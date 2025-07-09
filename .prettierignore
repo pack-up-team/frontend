@@ -1,0 +1,12 @@
+dist/
+build/
+node_modules/
+.prettierrc
+.eslintrc.cjs
+public/
+coverage/
+.vscode/
+.idea/
+.DS_Store
+*.config.js
+package-lock.json
