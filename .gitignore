@@ -1,26 +1,21 @@
-# ─────────── Node modules ───────────
+
 /node_modules/
 
-# ─────────── 빌드 결과물 ───────────
 /dist/
 /build/
 
-# ─────────── Vite 로컬 캐시 ───────────
+
 /.vite/
 
-# ─────────── 환경 변수 ───────────
 .env
 .env.*.local
 
-# ─────────── 로그 파일 ───────────
 npm-debug.log*
 yarn-error.log* 
 
-# ─────────── OS별 임시 파일 ───────────
 .DS_Store
 Thumbs.db
 
-# ─────────── 에디터/IDE 설정 ───────────
 .vscode/
 .idea/
 *.suo
@@ -28,14 +23,8 @@ Thumbs.db
 *.njsproj
 *.sln
 
-# ─────────── TypeScript 산출물 ───────────
 *.tsbuildinfo
 
-# ─────────── 기타 캐시 폴더 ───────────
 .cache/
 
-# ─────────── Storybook ───────────
 /storybook-static/
-
-# ─────────── Tailwind JIT 캐시 (필요 시) ───────────
-# .tailwind-cache/
