@@ -27,4 +27,6 @@ Thumbs.db
 
 .cache/
 
-/storybook-static/
+
+*storybook.log
+storybook-static
