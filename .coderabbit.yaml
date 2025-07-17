@@ -1,3 +1,5 @@
+base_branches: [main]
+
 review:
   high_level_summary: true
   inline_comments: true
