@@ -1,0 +1,9 @@
+review:
+  high_level_summary: true
+  inline_comments: true
+  categories:
+    - readability
+    - performance
+    - security
+    - best_practices
+    - bugs
