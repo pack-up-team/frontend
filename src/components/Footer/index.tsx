@@ -1,6 +1,6 @@
 import React from 'react';
-{/* 임시 아이콘 */}
-import { ReactComponent as LogoIcon } from '../assets/vite.svg';
+// 임시 아이콘
+import { ReactComponent as LogoIcon } from '../../assets/vite.svg';
 
 const Footer: React.FC = () => {
     return (
@@ -10,13 +10,13 @@ const Footer: React.FC = () => {
                 <div className='w-[390px] flex'>
                     <LogoIcon className="w-8 h-8 my-1.5 mr-2" />
                     <div className='flex items-center'>
-                        <button className='text-[#949494] px-6 py-[11px] flex items-center justify-center hover:underline hover:text-[#707070]'>이용약관</button>
+                        <button className='text-[#949494] px-6 py-[11px] flex items-center justify-center hover:underline hover:text-[#707070] font-pretendard'>이용약관</button>
                         <div className='w-px h-5 bg-[#F0F0F0]'></div>
-                        <button className='text-[#949494] px-6 py-[11px] flex items-center justify-center hover:underline hover:text-[#707070]'>개인정보처리방침</button>
+                        <button className='text-[#949494] px-6 py-[11px] flex items-center justify-center hover:underline hover:text-[#707070] font-pretendard'>개인정보처리방침</button>
                     </div>
                 </div>
                 {/* 우측: 카피라이트 */}
-                <div>
+                <div className='font-montserrat'>
                     Copyright © PACKUP Co. All rights reserved
                 </div>
             </div>
