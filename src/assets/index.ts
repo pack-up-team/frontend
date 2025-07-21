@@ -1,1 +1,1 @@
-export { ReactComponent as LogoIcon } from './vite.svg';
+export { default as LogoIcon } from './vite.svg?react';
