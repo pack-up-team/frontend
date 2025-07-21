@@ -1,0 +1,1 @@
+export { ReactComponent as LogoIcon } from './vite.svg';

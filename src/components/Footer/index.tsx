@@ -1,6 +1,6 @@
 import React from 'react';
 // 임시 아이콘
-import { ReactComponent as LogoIcon } from '../../assets/vite.svg';
+import { LogoIcon } from '../../assets';
 
 const Footer: React.FC = () => {
     return (
