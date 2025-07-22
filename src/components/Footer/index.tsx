@@ -4,7 +4,7 @@ import { LogoIcon } from '../../assets';
 
 const Footer: React.FC = () => {
     return (
-        <footer className='max-w-[1520px] w-full mx-auto bg-[#FAFAFA] border-t border-[#F0F0F0] text-base text-[#CCCCCC] pt-6 pb-14'>
+        <footer className='max-w-[1520px] w-full mx-auto border-t border-[#F0F0F0] text-base text-[#CCCCCC] pt-6 pb-14'>
             <div className='w-full flex justify-between items-center'>
                 {/* 좌측: 로고 + 링크 */}
                 <div className='w-[390px] flex'>
