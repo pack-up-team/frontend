@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "type-check": "tsc --noEmit",
+    "build-storybook": "npm run type-check && storybook build"
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.2.6",
