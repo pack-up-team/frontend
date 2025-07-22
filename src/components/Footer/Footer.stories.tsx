@@ -6,7 +6,7 @@ const meta: Meta<typeof Footer> = {
   component: Footer,
   decorators: [
     (Story) => (
-      <div className='bg-[#FFFFFF] w-full pt-5'>
+      <div className='bg-[#FAFAFA] w-[1920px] pt-[20px]'>
         <Story />
       </div>
     ),
