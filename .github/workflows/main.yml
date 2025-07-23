@@ -1,0 +1,57 @@
+name: Frontend Build-Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. PR 또는 push된 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Node.js 22 설치
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # 3. 의존성 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. 타입 체크
+      - name: Type Check
+        run: npm run type-check
+
+      # 5. Vite 빌드
+      - name: Build project
+        run: npm run build
+
+      # 6. 스토리북 빌드
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      # 7. 실패 시 PR에 댓글 달기 (PR일 때만 실행됨)
+      - name: Build Fail Comment
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `❌ 프론트엔드 빌드 테스트가 실패했습니다. GitHub Actions 탭에서 로그를 확인해주세요.`
+            });
