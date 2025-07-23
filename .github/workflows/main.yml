@@ -20,11 +20,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Node.js 22 설치
+      # 2. Node.js 설치
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
+          cache: 'npm'
 
       # 3. 의존성 설치
       - name: Install dependencies
