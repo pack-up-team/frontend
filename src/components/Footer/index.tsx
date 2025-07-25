@@ -1,5 +1,4 @@
 import React from 'react';
-// 임시 아이콘
 import { LogoIcon } from '../../assets';
 
 const Footer: React.FC = () => {
@@ -8,7 +7,7 @@ const Footer: React.FC = () => {
             <div className='w-full max-w-[1200px] mx-auto flex flex-col items-center gap-4 self-stretch web:flex-row web:justify-between'>
                 {/* 좌측: 로고 + 링크 */}
                 <div className='flex items-center gap-2'>
-                    <LogoIcon className="w-8 h-8" />
+                    <LogoIcon className="w-6 h-6" />
                     <div className='flex items-center'>
                         <a href='#' target='_blank' rel='noopener' className='flex h-11 px-6 justify-center items-center gap-2 text-[#949494] font-pretendard text-base font-medium leading-[140%] hover:underline hover:text-[#707070]'>이용약관</a>
                         {/* divider */}
