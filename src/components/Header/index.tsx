@@ -79,6 +79,7 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                                     </div>
                                     {/* nav */}
                                     <nav className='flex flex-col items-start self-stretch'>
+                                        {/* href 삼항 연산자 추후 추가(React Router 사용?) */}
                                         <a href='#' rel='noopener' className='flex h-[50px] px-6 py-2 justify-center items-center gap-2 self-stretch text-[rgba(0,0,0,0.72)] font-pretendard text-base font-medium leading-[140%]'>{pageType === 'landing' ? '로그인' : '마이페이지'}</a>
                                         <a href='#' rel='noopener' className='flex h-[50px] px-6 py-2 justify-center items-center gap-2 self-stretch text-[rgba(0,0,0,0.72)] font-pretendard text-base font-medium leading-[140%]'>{pageType === 'landing' ? '회원가입' : '로그아웃'}</a>
                                     </nav>
@@ -87,6 +88,7 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                         )}
                         {/* 액션 */}
                         <nav className='hidden web:flex items-center'>
+                            {/* href 삼항 연산자 추후 추가(React Router 사용?) */}
                             <a href='#' rel='noopener' className='flex h-11 px-6 justify-center items-center gap-2 text-[rgba(0,0,0,0.72)] font-pretendard text-base font-medium leading-[140%] hover:text-[#411BFF]'>{pageType === 'landing' ? '로그인' : '마이페이지'}</a>
                             <a href='#' rel='noopener' className='flex h-11 px-6 justify-center items-center gap-2 text-[rgba(0,0,0,0.72)] font-pretendard text-base font-medium leading-[140%] hover:text-[#411BFF]'>{pageType === 'landing' ? '회원가입' : '로그아웃'}</a>
                         </nav>
