@@ -12,10 +12,9 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
     // 알림 개수 결정
     const [localCount] = useState(0);
     const count = notificationCount !== undefined ? notificationCount : localCount;
-    const isDoubleDigit = count >= 10;
 
     // 알림 드롭다운 오픈 상태
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    // const [dropdownOpen, setDropdownOpen] = useState(false);
     // 햄버거 버튼 오픈 상태
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -39,7 +38,8 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                 {!isAuthPage && (
                     <div className='flex items-center web:gap-2'>
                         {/* 알림 버튼 */}
-                        <button onClick={() => setDropdownOpen((prev) => !prev)} className={`relative w-11 h-11 flex items-center justify-center ${pageType === 'landing' ? 'hidden' : ''}`}>
+                        {/* onClick={() => setDropdownOpen((prev) => !prev)} 추가 예정 */}
+                        <button className={`relative w-11 h-11 flex items-center justify-center ${pageType === 'landing' ? 'hidden' : ''}`}>
                             <AlertIcon className='w-8 h-8 flex-shrink-0 aspect-square' />
                             {/* 알림 badge */}
                             {count > 0 && (
