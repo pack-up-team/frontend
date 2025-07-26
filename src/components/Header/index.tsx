@@ -26,6 +26,13 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
     ];
     */
 
+    // 알림 badge 스타일 헬퍼 함수
+    const getBadgeStyles = (count: number) => {
+        if (count < 10) return 'w-[8px] h-[17px] top-[1.5px] right-[6px] text-[12px] leading-[16.8px] !tracking-[-0.48px]';
+        if (count < 100) return 'w-[13px] h-[14px] top-[3px] right-[3.5px] text-[10px] leading-[14px] !tracking-[-0.4px]';
+        return 'w-[19px] h-[14px] top-[3px] right-0 text-[10px] leading-[14px] !tracking-[-0.4px]';
+    };
+
     return (
         <header className='fixed top-0 left-0 z-20 w-full flex h-[76px] px-4 py-2 justify-between items-center flex-shrink-0 border-b border-[#F0F0F0] bg-white tablet:h-[84px] tablet:px-[60px] web:px-[120px]'>
             <div className='w-full max-w-[1200px] mx-auto flex justify-between items-center flex-shrink-0'>
@@ -39,17 +46,12 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                     <div className='flex items-center web:gap-2'>
                         {/* 알림 버튼 */}
                         {/* onClick={() => setDropdownOpen((prev) => !prev)} 추가 예정 */}
-                        <button className={`relative w-11 h-11 flex items-center justify-center ${pageType === 'landing' ? 'hidden' : ''}`}>
+                        <button className={`relative w-11 h-11 flex items-center justify-center ${pageType === 'landing' ? 'hidden' : ''}`} aria-label={`알림 ${count > 0 ? `${count > 99 ? '99개 이상' : count + '개'}` : '없음'}`} type="button">
                             <AlertIcon className='w-8 h-8 flex-shrink-0 aspect-square' />
                             {/* 알림 badge */}
                             {count > 0 && (
                                 <div className='absolute top-0 right-0 w-5 h-5 flex-shrink-0 rounded-full bg-[#FF1F57]'>
-                                    <span className={`absolute text-white flex items-center justify-center font-pretendard font-bold
-                                        ${count < 10
-                                            ? 'w-[8px] h-[17px] top-[1.5px] right-[6px] text-[12px] leading-[16.8px] !tracking-[-0.48px]'
-                                            : count < 100
-                                            ? 'w-[13px] h-[14px] top-[3px] right-[3.5px] text-[10px] leading-[14px] !tracking-[-0.4px]'
-                                            : 'w-[19px] h-[14px] top-[3px] right-0 text-[10px] leading-[14px] !tracking-[-0.4px]'}`}>
+                                    <span className={`absolute text-white flex items-center justify-center font-pretendard font-bold ${getBadgeStyles(count)}`}>
                                         {count > 99 ? '99+' : count}
                                     </span>
                                 </div>
