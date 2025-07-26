@@ -58,7 +58,7 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                             )}
                         </button>
                         {/* 햄버거 버튼 */}
-                        <button onClick={() => setDrawerOpen(true)} className='web:hidden flex h-[44px] justify-end items-center py-[10px] pl-[20px]'>
+                        <button onClick={() => setDrawerOpen(true)} className='web:hidden flex h-[44px] justify-end items-center py-[10px] pl-[20px]' aria-label='메뉴 열기' type="button">
                             <HamburgerIcon className='w-6 h-6 aspect-square' />
                         </button>
                         {/* side drawer */}
