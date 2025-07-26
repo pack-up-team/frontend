@@ -63,9 +63,9 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                         </button>
                         {/* side drawer */}
                         {drawerOpen && (
-                            <div className='fixed inset-0 z-50'>
+                            <div className='fixed inset-0 z-50' role="dialog" aria-modal="true" aria-labelledby="drawer-title">
                                 {/* dim */}
-                                <div onClick={() => setDrawerOpen(false)} className='absolute inset-0 bg-black/50'></div>
+                                <div onClick={() => setDrawerOpen(false)} className='absolute inset-0 bg-black/50' aria-hidden="true"></div>
                                 {/* drawer */}
                                 <div className='absolute right-0 top-0 w-[280px] h-full flex flex-col items-start gap-2 flex-shrink-0 bg-white shadow-[0_0_16px_0_rgba(0,0,0,0.02)] tablet:w-[320px]'>
                                     <div className='flex h-[50px] px-[24px] py-[8px] justify-between items-center self-stretch'>
