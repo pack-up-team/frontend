@@ -6,7 +6,7 @@ const meta: Meta<typeof Header> = {
     component: Header,
     decorators: [
         (Story) => (
-        <div className='bg-[#FAFAFA] w-full pb-5'>
+        <div className='fixed inset-0 bg-[#FAFAFA]'>
             <Story />
         </div>
         ),
