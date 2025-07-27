@@ -37,12 +37,31 @@ const Button = ({
     const stateStyle = styleMap[variant][currentState];
     const combined = `${baseStyle} ${stateStyle} ${className || ''}`;
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (disabled) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setInternalState('pressed');
+        }
+    };
+
+    const handleKeyUp = (e: React.KeyboardEvent) => {
+        if (disabled) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            setInternalState('hover');
+            onClick?.();
+        }
+    };
+
     return (
-        <button onClick={onClick} disabled={disabled} className={combined}
+        <button onClick={onClick} disabled={disabled} className={combined} aria-disabled={disabled}
         onMouseEnter={() => !disabled && setInternalState('hover')}
         onMouseLeave={() => !disabled && setInternalState('default')}
         onMouseDown={() => !disabled && setInternalState('pressed')}
-        onMouseUp={() => !disabled && setInternalState('hover')}>
+        onMouseUp={() => !disabled && setInternalState('hover')}
+        onFocus={() => !disabled && setInternalState('hover')}
+        onBlur={() => !disabled && setInternalState('default')}
+        onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {children}
         </button>
     );
