@@ -35,18 +35,18 @@ const FormInput = ({ label, variant = 'name', placeholder, value, onChange, stat
 
     return (
         <div className='flex flex-col items-start w-[343px] gap-2'>
-            <label className='text-base font-medium leading-normal text-[#141414] font-pretendard'>{label}</label>
+            <label htmlFor={`input-${label}`} className='text-base font-medium leading-normal text-[#141414] font-pretendard'>{label}</label>
             <div className='relative w-[343px] h-[56px]'>
                 {iconLeft}
-                <input type={inputType} value={value} onChange={onChange} placeholder={placeholder} className={`${stateStyle} ${iconLeft ? 'pl-[42px]' : 'pl-4'} absolute top-0 left-0 w-[343px] h-[56px]`}></input>
+                <input id={`input-${label}`} type={inputType} value={value} onChange={onChange} placeholder={placeholder} aria-invalid={state === 'error'} aria-describedby={state === 'error' && errorMessage ? `error-${label}` : undefined} className={`${stateStyle} ${iconLeft ? 'pl-[42px]' : 'pl-4'} absolute top-0 left-0 w-[343px] h-[56px]`}></input>
                 {isPassword && (
-                    <div onClick={() => setShowPassword((prev) => !prev)} className='absolute top-[19px] right-4 w-[18px] h-[18px] cursor-pointer'>
+                    <button type="button" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'} className='absolute top-[19px] right-4 w-[18px] h-[18px] cursor-pointer bg-transparent border-none'>
                         {showPassword ? <EyeOffIcon className='absolute top-0 right-0 w-[18px] h-[18px]' /> : <EyeIcon className='absolute top-0 right-0 w-[18px] h-[18px]' />}
-                    </div>
+                    </button>
                 )}
             </div>
             {state === 'error' && errorMessage && (
-                <p className='self-stretch text-[#D90050] font-pretendard text-[14px] font-medium leading-none'>{errorMessage}</p>
+                <p id={`error-${label}`} role="alert" className='self-stretch text-[#D90050] font-pretendard text-[14px] font-medium leading-none'>{errorMessage}</p>
             )}
         </div>
     );
