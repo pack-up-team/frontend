@@ -2,24 +2,8 @@ import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-
-// 서버 주소 설정
-// axios.defaults.baseURL = 'http://15.164.93.209:8080';
-
-/*
-type LoginFormData = {
-    email: string;
-    password: string;
-};
-
-type SignupFormData = {
-    name: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirmPassword: string;
-};
-*/
+import LoginForm from './components/LoginForm';
+import SignupForm from './components/SignupForm';
 
 // 로그인/회원가입 탭 스타일
 const tabStyles = {
@@ -49,6 +33,8 @@ const AuthPage = () => {
                             <button onClick={() => switchMode("login")} className={mode === "login" ? tabStyles.active : tabStyles.inactive}>로그인</button>
                             <button onClick={() => switchMode("signup")} className={mode === "signup" ? tabStyles.active : tabStyles.inactive}>회원가입</button>
                         </div>
+                        {/* 폼 전환 */}
+                        {mode === 'login' ? <LoginForm /> : <SignupForm />}
                     </div>
                 </div>
             </main>
