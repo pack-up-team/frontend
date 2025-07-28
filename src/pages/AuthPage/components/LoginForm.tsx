@@ -1,5 +1,85 @@
+import { Controller, useForm } from 'react-hook-form';
+import Button from '../../../components/Button';
+import FormInput from '../../../components/FormInput';
+
+type LoginFormData = {
+    email: string;
+    password: string;
+};
+
 const LoginForm = () => {
-    return <div>login form</div>;
+    const { control, handleSubmit } = useForm<LoginFormData>({
+        defaultValues: { email: '', password: '' },
+    });
+
+    // 임시 onSubmit
+    const onSubmit = (data: LoginFormData) => {
+        console.log(data);
+    };
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-center gap-8'>
+            {/* 문구 */}
+            <div className='flex flex-col items-center gap-4 self-stretch'>
+                <h2 className='h-[26px] self-stretch text-[#141414] text-center font-pretendard text-[26px] font-bold leading-none'>어서오세요!</h2>
+                <p className='h-[26px] self-stretch text-[#707070] text-center font-pretendard text-[16px] font-medium leading-[140%]'>로그인하고 나만의 할일 템플릿을 관리하세요.</p>
+            </div>
+            {/* form */}
+            <div className='flex flex-col items-end gap-8'>
+                {/* input */}
+                <div className='flex flex-col items-end gap-3'>
+                    <div className='flex flex-col items-start gap-[25px]'>
+                        {/* 이메일 */}
+                        <Controller name='email' control={control} render={({ field }) => (
+                            <FormInput label='이메일' variant='email' placeholder='이메일을 입력하세요' value={field.value} onChange={field.onChange} />
+                        )} />
+                        {/* 비밀번호 */}
+                        <Controller name='password' control={control} render={({ field }) => (
+                            <FormInput label='비밀번호' variant='password' placeholder='비밀번호를 입력하세요' value={field.value} onChange={field.onChange} />
+                        )} />
+                    </div>
+                    {/* 비밀번호 찾기 with 임시 링크 */}
+                    <a href='#' className='flex h-[40px] justify-center items-center gap-2 text-[#4D4D4D] text-center font-pretendard text-[16px] font-medium leading-none'>비밀번호 찾기</a>
+                </div>
+                {/* actions */}
+                <div className='flex flex-col items-center gap-8'>
+                    <Button className='w-[343px] h-[50px]'>이메일 로그인</Button>
+                    <div className='flex flex-col items-start gap-6 self-stretch'>
+                        {/* 구분선 */}
+                        <div className='flex w-[343px] items-center gap-3'>
+                            {/* 왼쪽 선 */}
+                            <div className='flex-1 h-0'>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="146" height="2" viewBox="0 0 146 2" fill="none">
+                                    <path d="M0.21875 1.01172H145.719" stroke="#E6E6E6" strokeWidth="1" />
+                                </svg>
+                            </div>
+                            <span className='whitespace-nowrap text-[#949494] text-center font-pretendard text-[16px] font-medium leading-none'>또는</span>
+                            {/* 오른쪽 선 */}
+                            <div className='flex-1 h-0'>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="146" height="2" viewBox="0 0 146 2" fill="none">
+                                    <path d="M0.21875 1.01172H145.719" stroke="#E6E6E6" strokeWidth="1" />
+                                </svg>
+                            </div>
+                        </div>
+                        {/* buttons */}
+                        <div className='flex flex-col items-center gap-4'>
+                            <div className='flex flex-col items-start gap-4'>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    Google 로그인
+                                </Button>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    카카오 로그인
+                                </Button>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    네이버 로그인
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    );
 };
 
 export default LoginForm;
