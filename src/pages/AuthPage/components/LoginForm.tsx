@@ -1,6 +1,7 @@
 import { Controller, useForm } from 'react-hook-form';
 import Button from '../../../components/Button';
 import FormInput from '../../../components/FormInput';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../../../assets';
 
 type LoginFormData = {
     email: string;
@@ -65,12 +66,15 @@ const LoginForm = () => {
                         <div className='flex flex-col items-center gap-4'>
                             <div className='flex flex-col items-start gap-4'>
                                 <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <GoogleIcon className='w-[18px] h-[18px]' />
                                     Google 로그인
                                 </Button>
                                 <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <KakaoIcon className='w-[18px] h-[18px]' />
                                     카카오 로그인
                                 </Button>
                                 <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <NaverIcon className='w-[18px] h-[18px]' />
                                     네이버 로그인
                                 </Button>
                             </div>
