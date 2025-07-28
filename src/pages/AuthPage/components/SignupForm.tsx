@@ -1,5 +1,111 @@
+import { Controller, useForm } from 'react-hook-form';
+import Button from '../../../components/Button';
+import FormInput from '../../../components/FormInput';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../../../assets';
+
+type SignupFormData = {
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+    agreeTerms: boolean;
+    agreePrivacy: boolean;
+    agreeMarketing: boolean;
+};
+
 const SignupForm = () => {
-    return <div>signup form</div>;
+    const { control, handleSubmit } = useForm<SignupFormData>({
+        defaultValues: {
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: '',
+            agreeTerms: false,
+            agreePrivacy: false,
+            agreeMarketing: false
+        }
+    });
+
+    // 임시 onSubmit
+    const onSubmit = (data: SignupFormData) => {
+        console.log(data);
+    };
+
+    // const password = watch('password');
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-center gap-8'>
+            {/* 문구 */}
+            <h2 className='h-[26px] self-stretch text-[#141414] text-center font-pretendard text-[26px] font-bold leading-none'>새로운 계정 생성</h2>
+            {/* form */}
+            <div className='flex flex-col justify-center items-start gap-8'>
+                {/* input */}
+                <div className='flex flex-col items-start gap-4'>
+                    <div className='flex flex-col items-end gap-3'>
+                        <div className='flex flex-col items-start gap-[25px] self-stretch'>
+                            {/* 이메일 */}
+                            <Controller name='email' control={control} render={({ field }) => (
+                                <FormInput label='이메일' variant='email' placeholder='이메일을 입력하세요' value={field.value} onChange={field.onChange} />
+                            )} />
+                            {/* 연락처 */}
+                            <Controller name='phone' control={control} render={({ field }) => (
+                                <FormInput label='연락처' variant='phone' placeholder='연락처를 입력하세요' value={field.value} onChange={field.onChange} />
+                            )} />
+                            {/* 비밀번호 */}
+                            <Controller name='password' control={control} render={({ field }) => (
+                                <FormInput label='비밀번호' variant='password' placeholder='비밀번호를 입력하세요' value={field.value} onChange={field.onChange} />
+                            )} />
+                            {/* 비밀번호 확인 */}
+                            <Controller name='confirmPassword' control={control} render={({ field }) => (
+                                <FormInput label='비밀번호 확인' variant='password' placeholder='비밀번호를 다시 입력하세요' value={field.value} onChange={field.onChange} />
+                            )} />
+                        </div>
+                    </div>
+                    {/* 체크박스들 */}
+                    <div className='flex flex-col items-start gap-[10px] self-stretch'></div>
+                </div>
+                {/* actions */}
+                <div className='flex flex-col items-center gap-8'>
+                    <Button className='w-[343px] h-[50px]'>계정 만들기</Button>
+                    <div className='flex flex-col items-start gap-6'>
+                        {/* 구분선 */}
+                        <div className='flex w-[343px] items-center gap-3'>
+                            {/* 왼쪽 선 */}
+                            <div className='flex-1 h-0'>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="146" height="2" viewBox="0 0 146 2" fill="none">
+                                    <path d="M0.21875 1.01172H145.719" stroke="#E6E6E6" strokeWidth="1" />
+                                </svg>
+                            </div>
+                            <span className='whitespace-nowrap text-[#949494] text-center font-pretendard text-[16px] font-medium leading-none'>또는</span>
+                            {/* 오른쪽 선 */}
+                            <div className='flex-1 h-0'>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="146" height="2" viewBox="0 0 146 2" fill="none">
+                                    <path d="M0.21875 1.01172H145.719" stroke="#E6E6E6" strokeWidth="1" />
+                                </svg>
+                            </div>
+                        </div>
+                        {/* buttons */}
+                        <div className='flex flex-col items-center gap-4'>
+                            <div className='flex flex-col items-start gap-4'>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <GoogleIcon className='w-[18px] h-[18px]' />
+                                    Google로 시작하기
+                                </Button>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <KakaoIcon className='w-[18px] h-[18px]' />
+                                    카카오로 시작하기
+                                </Button>
+                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                    <NaverIcon className='w-[18px] h-[18px]' />
+                                    네이버로 시작하기
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    );
 };
 
 export default SignupForm;
