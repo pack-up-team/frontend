@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { LogoIcon, AlertIcon, HamburgerIcon, CloseIcon } from '../../assets';
 
 interface HeaderProps {
-    pageType?: 'login' | 'signup' | 'landing' | 'default';
+    pageType?: 'auth' | 'landing' | 'default';
     notificationCount?: number;
 }
 
 const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
-    const isAuthPage = pageType === 'login' || pageType === 'signup';
+    const isAuthPage = pageType === 'auth';
     
     // 알림 개수 결정
     const [localCount] = useState(0);
@@ -41,7 +41,7 @@ const Header = ({ pageType = 'default', notificationCount }: HeaderProps) => {
                     <LogoIcon className='w-6 h-6 aspect-square' />
                     <span className='text-black font-montserrat text-[18px] font-semibold uppercase'>Pack up</span>
                 </a>
-                {/* login, signup 페이지는 로고만 */}
+                {/* auth 페이지는 로고만 */}
                 {!isAuthPage && (
                     <div className='flex items-center web:gap-2'>
                         {/* 알림 버튼 */}
