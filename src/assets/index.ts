@@ -7,3 +7,6 @@ export { default as PhoneIcon } from './phone.svg?react';
 export { default as LockIcon } from './lock.svg?react';
 export { default as EyeIcon } from './eye.svg?react';
 export { default as EyeOffIcon } from './eye-off.svg?react';
+export { default as GoogleIcon } from './google.svg?react';
+export { default as KakaoIcon } from './kakao.svg?react';
+export { default as NaverIcon } from './naver.svg?react';
