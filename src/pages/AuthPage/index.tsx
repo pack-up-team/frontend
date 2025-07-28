@@ -3,6 +3,24 @@ import { useSearchParams } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
+// 서버 주소 설정
+// axios.defaults.baseURL = 'http://15.164.93.209:8080';
+
+/*
+type LoginFormData = {
+    email: string;
+    password: string;
+};
+
+type SignupFormData = {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+};
+*/
+
 // 로그인/회원가입 탭 스타일
 const tabStyles = {
     inactive: "text-[#949494] text-center font-pretendard text-[18px] font-semibold leading-normal flex h-[50px] py-[16px] justify-center items-center gap-[8px] flex-1",
