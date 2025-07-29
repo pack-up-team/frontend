@@ -11,6 +11,7 @@ type LoginFormData = {
 const LoginForm = () => {
     const { control, handleSubmit } = useForm<LoginFormData>({
         defaultValues: { email: '', password: '' },
+        mode: 'onChange', // 실시간 validation
     });
 
     // 임시 onSubmit
@@ -31,9 +32,28 @@ const LoginForm = () => {
                 <div className='flex flex-col items-end gap-3'>
                     <div className='flex flex-col items-start gap-[25px]'>
                         {/* 이메일 */}
-                        <Controller name='email' control={control} render={({ field }) => (
-                            <FormInput label='이메일' variant='email' placeholder='이메일을 입력하세요' value={field.value} onChange={field.onChange} />
-                        )} />
+                        <Controller
+                            name='email'
+                            control={control}
+                            rules={{
+                                required: '이메일을 입력해주세요',
+                                pattern: {
+                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                    message: '올바른 이메일 형식을 입력해주세요'
+                                }
+                            }}
+                            render={({ field, fieldState }) => (
+                                <FormInput 
+                                    label='이메일' 
+                                    variant='email' 
+                                    placeholder='이메일을 입력하세요' 
+                                    value={field.value} 
+                                    onChange={field.onChange}
+                                    state={fieldState.error ? 'error' : 'default'} // 에러일 때 border 색 변경
+                                    errorMessage={fieldState.error?.message} // 에러 메시지 표시
+                                />
+                            )} 
+                        />
                         {/* 비밀번호 */}
                         <Controller name='password' control={control} render={({ field }) => (
                             <FormInput label='비밀번호' variant='password' placeholder='비밀번호를 입력하세요' value={field.value} onChange={field.onChange} />
