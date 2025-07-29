@@ -13,3 +13,5 @@ export { default as NaverIcon } from './naver.svg?react';
 export { default as CheckboxIcon } from './checkbox.svg?react';
 export { default as CheckboxOffIcon } from './checkbox-off.svg?react';
 export { default as CheckIcon } from './check.svg?react';
+export { default as CoinIcon } from './coin.svg?react';
+export { default as FastIcon } from './fast.svg?react';
