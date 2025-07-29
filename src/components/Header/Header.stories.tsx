@@ -14,7 +14,7 @@ const meta: Meta<typeof Header> = {
     argTypes: {
         pageType: {
             control: { type: 'select' },
-            options: ['default', 'landing', 'login', 'signup'],
+            options: ['default', 'landing', 'auth'],
             description: '헤더의 페이지 타입',
         },
         notificationCount: {

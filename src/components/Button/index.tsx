@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 type ButtonProps = {
+    type?: 'button' | 'submit' | 'reset';
     variant?: 'fill' | 'line';
     disabled?: boolean;
     children: React.ReactNode;
@@ -24,6 +25,7 @@ const styleMap = {
 };
 
 const Button = ({
+    type = 'button',
     variant = 'fill',
     disabled = false,
     children,
@@ -54,7 +56,7 @@ const Button = ({
     };
 
     return (
-        <button onClick={onClick} disabled={disabled} className={combined} aria-disabled={disabled}
+        <button type={type} onClick={onClick} disabled={disabled} className={combined} aria-disabled={disabled}
         onMouseEnter={() => !disabled && setInternalState('hover')}
         onMouseLeave={() => !disabled && setInternalState('default')}
         onMouseDown={() => !disabled && setInternalState('pressed')}
