@@ -44,7 +44,7 @@ const LoginForm = () => {
                 </div>
                 {/* actions */}
                 <div className='flex flex-col items-center gap-8'>
-                    <Button className='w-[343px] h-[50px]'>이메일 로그인</Button>
+                    <Button type='submit' className='w-[343px] h-[50px]'>이메일 로그인</Button>
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         {/* 구분선 */}
                         <div className='flex w-[343px] items-center gap-3'>

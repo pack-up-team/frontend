@@ -94,7 +94,7 @@ const SignupForm = () => {
                 </div>
                 {/* actions */}
                 <div className='flex flex-col items-center gap-8'>
-                    <Button className='w-[343px] h-[50px]'>계정 만들기</Button>
+                    <Button type='submit' className='w-[343px] h-[50px]'>계정 만들기</Button>
                     <div className='flex flex-col items-start gap-6'>
                         {/* 구분선 */}
                         <div className='flex w-[343px] items-center gap-3'>
