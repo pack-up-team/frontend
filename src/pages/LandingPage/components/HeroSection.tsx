@@ -37,12 +37,12 @@ const HeroSection = () => {
                 <Button onClick={() => navigate('/auth')} className="w-[343px] h-[50px]">지금 시작하기</Button>
                 <div className='flex items-center gap-10'>
                     <div className='flex items-center gap-3'>
-                        <CoinIcon className='w-8 h-8' />
-                        <p className='text-[#4D4D4D] text-center font-pretendard text-[18px] font-medium leading-normal'>무료 사용</p>
+                        <CoinIcon className='w-8 h-8' aria-hidden="true" />
+                        <span className='text-[#4D4D4D] text-center font-pretendard text-[18px] font-medium leading-normal'>무료 사용</span>
                     </div>
                     <div className='flex items-center gap-3'>
-                        <FastIcon className='w-8 h-8' />
-                        <p className='text-[#4D4D4D] text-center font-pretendard text-[18px] font-medium leading-normal'>간편 템플릿 생성 시 1분 소요!</p>
+                        <FastIcon className='w-8 h-8' aria-hidden="true" />
+                        <span className='text-[#4D4D4D] text-center font-pretendard text-[18px] font-medium leading-normal'>간편 템플릿 생성 시 1분 소요!</span>
                     </div>
                 </div>
             </div>
