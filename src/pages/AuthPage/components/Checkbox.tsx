@@ -18,18 +18,16 @@ const Checkbox = ({ label, onChange, onViewClick }: CheckboxProps) => {
 
     return (
         <div className="flex justify-between items-center self-stretch">
-            <div className="flex items-center gap-1">
+            <div onClick={toggleCheck} className="cursor-pointer flex items-center gap-1">
                 {checked ? 
-                    <CheckboxIcon 
-                        onClick={toggleCheck} 
-                        className='cursor-pointer w-[36px] h-[36px]' 
+                    <CheckboxIcon
+                        className='w-[36px] h-[36px]' 
                         role="checkbox" 
                         aria-checked="true"
                         aria-label={`${label} 선택됨`}
                     /> : 
-                    <CheckboxOffIcon 
-                        onClick={toggleCheck} 
-                        className='cursor-pointer w-[36px] h-[36px]' 
+                    <CheckboxOffIcon
+                        className='w-[36px] h-[36px]' 
                         role="checkbox" 
                         aria-checked="false"
                         aria-label={`${label} 선택되지 않음`}
