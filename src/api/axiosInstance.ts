@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 const instance = axios.create({
-    baseURL: 'http://15.164.93.209:8080', // 서버 주소 설정
+    baseURL,
     withCredentials: false,
 });
 
