@@ -16,7 +16,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
     reverse = false,
 }) => {
     return (
-        <section className={`flex w-[1200px] items-center gap-[24px] ${reverse ? 'flex-row-reverse' : ''}`}>
+        <section className={`flex w-full max-w-[1200px] items-center gap-[24px] ${reverse ? 'flex-row-reverse' : ''}`}>
             {/* 텍스트 영역 */}
             <div className="flex flex-col items-start gap-[54px] flex-[1_0_0]">
                 <div className="flex flex-col items-start gap-[16px] self-stretch">
@@ -34,8 +34,17 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
                     ))}
                 </div>
             </div>
-            {/* 이미지 교체 필요 */}
-            <div className="w-[700px] h-[540px] flex-shrink-0 rounded-[12px] bg-cover" style={{ backgroundImage: `url(${image})` }}></div>
+            {/* 이미지 영역 */}
+            <div className="w-[700px] h-[540px] flex-shrink-0 rounded-[12px] overflow-hidden">
+                <img 
+                    src={image} 
+                    alt={`${title} 기능 일러스트`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                    }}
+                />
+            </div>
         </section>
     );
 };
