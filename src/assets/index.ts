@@ -15,3 +15,4 @@ export { default as CheckboxOffIcon } from './checkbox-off.svg?react';
 export { default as CheckIcon } from './check.svg?react';
 export { default as CoinIcon } from './coin.svg?react';
 export { default as FastIcon } from './fast.svg?react';
+export { default as CorrectIcon } from './correct.svg?react';
