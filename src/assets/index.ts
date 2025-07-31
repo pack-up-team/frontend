@@ -16,3 +16,7 @@ export { default as CheckIcon } from './check.svg?react';
 export { default as CoinIcon } from './coin.svg?react';
 export { default as FastIcon } from './fast.svg?react';
 export { default as CorrectIcon } from './correct.svg?react';
+export { default as RenameIcon } from './rename.svg?react';
+export { default as EditIcon } from './edit.svg?react';
+export { default as DuplicateIcon } from './duplicate.svg?react';
+export { default as DeleteIcon } from './delete.svg?react';
