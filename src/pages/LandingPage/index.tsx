@@ -11,10 +11,10 @@ const LandingPage = () => {
         <div className="w-full bg-white">
             <Header pageType="landing" />
             <div className="relative pt-[152px] mx-auto w-[1085px]">
-                <img src="/landing-bg-1.png" className="absolute top-[678px] left-[873px]" />
-                <img src="/landing-bg-2.png" className="absolute top-[677px] left-[-98px]" />
-                <img src="/landing-bg-3.png" className="absolute top-[298px] left-[42px]" />
-                <img src="/landing-bg-4.png" className="absolute top-[321px] left-[1010px]" />
+                <img src="/landing-bg-1.png" alt="" className="absolute top-[678px] left-[873px]" />
+                <img src="/landing-bg-2.png" alt="" className="absolute top-[677px] left-[-98px]" />
+                <img src="/landing-bg-3.png" alt="" className="absolute top-[298px] left-[42px]" />
+                <img src="/landing-bg-4.png" alt="" className="absolute top-[321px] left-[1010px]" />
                 <HeroSection />
             </div>
             <p className="mx-auto pt-[204px] pb-[70px] text-center text-[#949494] font-pretendard text-[22px] font-semibold leading-normal">핵심 기능</p>
