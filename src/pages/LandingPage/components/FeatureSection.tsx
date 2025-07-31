@@ -16,7 +16,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
     reverse = false,
 }) => {
     return (
-        <section className={`flex w-full max-w-[1200px] items-center gap-[24px] ${reverse ? 'flex-row-reverse' : ''}`}>
+        <section className={`mx-auto flex w-full max-w-[1200px] items-center gap-[24px] ${reverse ? 'flex-row-reverse' : ''}`}>
             {/* 텍스트 영역 */}
             <div className="flex flex-col items-start gap-[54px] flex-[1_0_0]">
                 <div className="flex flex-col items-start gap-[16px] self-stretch">
