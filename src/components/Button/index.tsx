@@ -11,10 +11,10 @@ type ButtonProps = {
 
 const styleMap = {
     fill: {
-        default: 'bg-[#411BFF] text-white',
-        hover: 'bg-[#2500DB] text-white',
-        pressed: 'bg-[#1B00A1] text-white',
-        disabled: 'bg-[#E6E6E6] text-[#949494]'
+        default: 'border border-transparent bg-[#411BFF] text-white',
+        hover: 'border border-transparent bg-[#2500DB] text-white',
+        pressed: 'border border-transparent bg-[#1B00A1] text-white',
+        disabled: 'border border-transparent bg-[#E6E6E6] text-[#949494]'
     },
     line: {
         default: 'border border-[#CCCCCC] text-[#141414]',
