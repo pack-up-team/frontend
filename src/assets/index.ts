@@ -24,3 +24,4 @@ export { default as BookmarkOnIcon } from './bookmark-on.svg?react';
 export { default as BookmarkOffIcon } from './bookmark-off.svg?react';
 export { default as MoreIcon } from './more.svg?react';
 export { default as ArrowIcon } from './arrow.svg?react';
+export { default as EmptyIcon } from './empty.svg?react';
