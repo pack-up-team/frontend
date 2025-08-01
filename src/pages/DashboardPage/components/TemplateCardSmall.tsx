@@ -5,7 +5,7 @@ import { BookmarkOffIcon, BookmarkOnIcon, MoreIcon } from "../../../assets";
 
 type TemplateCardSmallProps = {
     template: TemplateListItem;
-    onRename: (templateNo: number) => void;
+    onRename: (templateNo: number, newName: string) => void;
     onEdit: (templateNo: number) => void;
     onDuplicate: (templateNo: number) => void;
     onDelete: (templateNo: number) => void;
@@ -22,9 +22,28 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
     const [bookmarked, setBookmarked] = useState(template.isBookmarked ?? false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // 인라인 편집
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedName, setEditedName] = useState(template.templateNm);
+
     const toggleBookmark = () => {
         setBookmarked((prev) => !prev);
         // TODO: 백엔드 API 호출해서 북마크 상태 업데이트
+    };
+
+    // 템플릿 이름 저장
+    const handleSaveName = () => {
+        onRename(template.templateNo, editedName);
+        // TODO: 백엔드 API 호출해서 템플릿 이름 업데이트
+        setIsEditing(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") handleSaveName();
+        if (e.key === "Escape") {
+            setEditedName(template.templateNm); // 원래 이름 복구
+            setIsEditing(false);
+        }
     };
 
     // DropdownMenu 바깥을 클릭하면 닫기
@@ -55,7 +74,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
                     {isDropdownOpen && (
                         <div className="absolute top-[38px] right-0 z-50">
                             <DropdownMenu
-                                onRename={() => onRename(template.templateNo)}
+                                onRename={() => { setIsEditing(true); setDropdownOpen(false); }}
                                 onEdit={() => onEdit(template.templateNo)}
                                 onDuplicate={() => onDuplicate(template.templateNo)}
                                 onDelete={() => onDelete(template.templateNo)}
@@ -67,9 +86,14 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             {/* 템플릿 이름 + 카테고리 */}
             <div className="flex flex-col items-start gap-[8px] self-stretch">
                 {/* 템플릿 이름 */}
-                <div className="flex w-[240px] h-[38px] items-center gap-[8px] bg-white">
-                    <h3 className="text-[rgba(0,0,0,0.9)] font-pretendard text-[18px] font-semibold leading-normal">{template.templateNm}</h3>
-                </div>
+                {isEditing ? (
+                    <input className="flex w-[240px] h-[38px] px-4 items-center gap-1 flex-shrink-0 rounded-lg border border-[#8D76FF] bg-white text-[rgba(0,0,0,0.9)] font-pretendard text-[18px] font-semibold leading-normal caret-[#775CFF] outline-none"
+                    value={editedName} autoFocus onChange={(e) => setEditedName(e.target.value)} onKeyDown={handleKeyDown} onBlur={handleSaveName}></input>
+                ) : (
+                    <div className="flex w-[240px] h-[38px] items-center gap-[8px] bg-white">
+                        <h3 className="text-[rgba(0,0,0,0.9)] font-pretendard text-[18px] font-semibold leading-normal">{template.templateNm}</h3>
+                    </div>
+                )}
                 {/* 카테고리 */}
                 {template.categoryNm && (
                     <div className="flex items-center">
