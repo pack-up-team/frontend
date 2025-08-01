@@ -20,3 +20,6 @@ export { default as RenameIcon } from './rename.svg?react';
 export { default as EditIcon } from './edit.svg?react';
 export { default as DuplicateIcon } from './duplicate.svg?react';
 export { default as DeleteIcon } from './delete.svg?react';
+export { default as BookmarkOnIcon } from './bookmark-on.svg?react';
+export { default as BookmarkOffIcon } from './bookmark-off.svg?react';
+export { default as MoreIcon } from './more.svg?react';
