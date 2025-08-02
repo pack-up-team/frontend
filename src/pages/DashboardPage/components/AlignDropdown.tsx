@@ -26,13 +26,13 @@ const AlignDropdown: React.FC<AlignDropdownProps> = ({ selectedAlign, onAlignCha
     return (
         <div ref={dropdownRef} className="relative">
             {/* 선택된 정렬 기준 버튼 */}
-            <button onClick={() => setOpen(!open)} className="flex w-[160px] h-[44px] px-[16px] py-[8px] justify-between items-center rounded-[8px] border border-[#CCC]">
+            <button onClick={() => setOpen(!open)} className="flex w-[169px] h-[44px] px-[16px] py-[8px] justify-between items-center rounded-[8px] border border-[#CCC]">
                 <span className="flex-[1_0_0] text-[#949494] font-pretendard text-[16px] font-medium leading-normal">{selectedAlign}</span>
                 <ArrowIcon className="w-[38px] h-[38px]" />
             </button>
             {/* 드롭다운 */}
             {open && (
-                <div className="flex w-[145px] px-[16px] py-[12px] items-center rounded-[8px] bg-white shadow-[0_0_16px_0_rgba(0,0,0,0.12)]">
+                <div className="absolute right-0 top-[44px] flex w-[169px] px-[16px] py-[12px] items-center rounded-[8px] bg-white shadow-[0_0_16px_0_rgba(0,0,0,0.12)]">
                     <div className="flex flex-col items-start gap-3">
                         {alignOptions.map((option) => (
                             <button key={option} onClick={() => (onAlignChange(option), setOpen(false))} className="flex h-[36px] justify-center items-center gap-[8px]">
