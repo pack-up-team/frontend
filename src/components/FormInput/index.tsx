@@ -47,7 +47,7 @@ const FormInput = ({ label, variant = 'name', placeholder, value, onChange, stat
                 onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}></input>
                 {isPassword && (
                     <button type="button" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'} className='absolute top-[19px] right-4 w-[18px] h-[18px] cursor-pointer bg-transparent border-none'>
-                        {showPassword ? <EyeOffIcon className='absolute top-0 right-0 w-[18px] h-[18px]' /> : <EyeIcon className='absolute top-0 right-0 w-[18px] h-[18px]' />}
+                        {showPassword ? <EyeIcon className='absolute top-0 right-0 w-[18px] h-[18px]' /> : <EyeOffIcon className='absolute top-0 right-0 w-[18px] h-[18px]' />}
                     </button>
                 )}
             </div>
