@@ -10,6 +10,7 @@ export type TemplateListItem = {
     thumbnail?: string;         // 썸네일 URL
     isBookmarked?: boolean;     // 북마크 여부
     alarmDt?: string;           // 알림 시간(정렬 기준)
+    placeholder?: boolean;
 };
 
 type TemplateListStore = {
