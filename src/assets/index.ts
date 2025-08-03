@@ -26,3 +26,6 @@ export { default as MoreIcon } from './more.svg?react';
 export { default as ArrowIcon } from './arrow.svg?react';
 export { default as EmptyIcon } from './empty.svg?react';
 export { default as AlertEmptyIcon } from './alert-empty.svg?react';
+export { default as MyPageIcon } from './my-page.svg?react';
+export { default as LogoutIcon } from './logout.svg?react';
+export { default as ArrowSquareIcon } from './arrow-square.svg?react';
