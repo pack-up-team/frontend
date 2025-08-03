@@ -1,33 +1,34 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { MyPageIcon, LogoutIcon, ArrowSquareIcon } from "../../../assets";
 
 type ProfileDropdownProps = {
     username: string;
-    isOpen: boolean;
-    onOpen: () => void;
-    onClose: () => void;
     onLogout: () => void;
     onMyPage: () => void;
 };
 
-const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ username, isOpen, onOpen, onClose, onLogout, onMyPage }) => {
+const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ username, onLogout, onMyPage }) => {
+    const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const handleToggle = () => setIsOpen((prev) => !prev);
+    const handleClose = () => setIsOpen(false);
 
     // 외부 클릭 시 닫힘
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-                onClose();
+                handleClose();
             }
         };
         if (isOpen) document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen, onClose]);
+    }, [isOpen]);
 
     return (
         <div ref={dropdownRef} className="relative">
             {/* 항상 보이는 username 버튼 */}
-            <button onClick={isOpen ? onClose : onOpen} className="flex h-[44px] px-[16px] justify-center items-center gap-[8px]">
+            <button onClick={handleToggle} className="flex h-[44px] px-[16px] justify-center items-center gap-[8px]">
                 <span className="text-[rgba(0,0,0,0.72)] font-pretendard text-[16px] font-semibold leading-[140%]">{username}</span>
                 <ArrowSquareIcon className="w-[18px] h-[18px]" />
             </button>
@@ -36,7 +37,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ username, isOpen, onO
                 <div className="absolute right-0 top-11 flex w-[191px] px-[16px] py-[12px] items-center rounded-[8px] bg-white shadow-[0_0_16px_0_rgba(0,0,0,0.12)]">
                     <div className="flex flex-col items-start gap-[12px]">
                         {/* 마이페이지 버튼 */}
-                        <button onClick={() => { onMyPage(); onClose(); }} className="flex h-[36px] justify-center items-center gap-[8px]">
+                        <button onClick={() => { onMyPage(); handleClose(); }} className="flex h-[36px] justify-center items-center gap-[8px]">
                             <MyPageIcon className="w-[18px] h-[18px]" />
                             <span className="text-[rgba(0,0,0,0.7)] font-pretendard text-[16px] font-medium leading-normal">마이페이지</span>
                         </button>
@@ -47,7 +48,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ username, isOpen, onO
                             </svg>
                         </div>
                         {/* 로그아웃 버튼 */}
-                        <button onClick={() => { onLogout(); onClose(); }} className="flex h-[36px] items-center gap-[8px] self-stretch">
+                        <button onClick={() => { onLogout(); handleClose(); }} className="flex h-[36px] items-center gap-[8px] self-stretch">
                             <LogoutIcon className="w-[18px] h-[18px]" />
                             <span className="text-[rgba(0,0,0,0.7)] font-pretendard text-[16px] font-medium leading-normal">로그아웃</span>
                         </button>
