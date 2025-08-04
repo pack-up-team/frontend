@@ -48,7 +48,16 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
 
     // 템플릿 이름 저장
     const handleSaveName = () => {
-        onRename(template.templateNo, editedName);
+        const trimmedName = editedName.trim(); // 앞뒤 공백 제거
+
+        if (!trimmedName) {
+            // 이름이 공백이면 원래 이름으로 복구하고 편집 종료
+            setEditedName(template.templateNm);
+            setIsEditing(false);
+            return;
+        }
+
+        onRename(template.templateNo, trimmedName); // 정상 저장
         // TODO: 백엔드 API 호출해서 템플릿 이름 업데이트
         setIsEditing(false);
     };
