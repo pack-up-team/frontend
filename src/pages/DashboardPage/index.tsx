@@ -109,23 +109,6 @@ const DashboardPage = () => {
         updDt: "2025-07-22T12:00:00Z",
         thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
         },
-        {
-        templateNo: 11,
-        templateNm: "일정 정리",
-        categoryNm: "업무",
-        regDt: "2025-07-21T15:30:00Z",
-        updDt: "2025-07-21T15:30:00Z",
-        isBookmarked: true,
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 12,
-        templateNm: "국내 여행 코스",
-        categoryNm: "여행",
-        regDt: "2025-07-20T12:00:00Z",
-        updDt: "2025-07-20T13:00:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
     ];
 
     // 전체 템플릿 데이터
