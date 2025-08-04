@@ -20,15 +20,30 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
 }) => {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [bookmarked, setBookmarked] = useState(template.isBookmarked ?? false);
+    const [isBookmarkLoading, setIsBookmarkLoading] = useState(false); // 로딩 상태 추가
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // 인라인 편집
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(template.templateNm);
 
-    const toggleBookmark = () => {
-        setBookmarked((prev) => !prev);
-        // TODO: 백엔드 API 호출해서 북마크 상태 업데이트
+    const toggleBookmark = async () => {
+        if (isBookmarkLoading) return;
+
+        setIsBookmarkLoading(true);
+        setBookmarked((prev) => !prev); // 낙관적 UI 업데이트
+
+        try {
+            // TODO: API 연결 시 아래 코드에 적용
+            console.log(`템플릿 ${template.templateNo} 북마크 상태 변경 요청`);
+            // await bookmarksService.toggle(template.templateNo);
+        } catch (error) {
+            // 실패 시 원래대로 복구
+            setBookmarked((prev) => !prev);
+            console.error("북마크 상태 변경 실패:", error);
+        } finally {
+            setIsBookmarkLoading(false);
+        }
     };
 
     // 템플릿 이름 저장
@@ -64,7 +79,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             style={{ backgroundImage: `url(${template.thumbnail})` }}>
                 <div ref={dropdownRef} className="absolute top-6 right-6 flex items-center gap-2">
                     {/* 북마크 버튼 */}
-                    <button onClick={toggleBookmark} className="flex w-[38px] h-[38px] p-[7px] justify-center items-center rounded-[12px] bg-[rgba(255,255,255,0.24)]">
+                    <button onClick={toggleBookmark} disabled={isBookmarkLoading} className="flex w-[38px] h-[38px] p-[7px] justify-center items-center rounded-[12px] bg-[rgba(255,255,255,0.24)]">
                         {bookmarked ? <BookmarkOnIcon className="w-[24px] h-[24px] flex-shrink-0" /> : <BookmarkOffIcon className="w-[24px] h-[24px] flex-shrink-0" />}
                     </button>
                     {/* 옵션 더보기 버튼 */}
