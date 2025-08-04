@@ -28,7 +28,12 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ username, onLogout, o
     return (
         <div ref={dropdownRef} className="relative">
             {/* 항상 보이는 username 버튼 */}
-            <button onClick={handleToggle} className="flex h-[44px] px-[16px] justify-center items-center gap-[8px]">
+            <button
+            onClick={handleToggle}
+            onKeyDown={(e) => e.key === "Escape" && handleClose()}
+            aria-expanded={isOpen}
+            aria-haspopup="menu"
+            className="flex h-[44px] px-[16px] justify-center items-center gap-[8px]">
                 <span className="text-[rgba(0,0,0,0.72)] font-pretendard text-[16px] font-semibold leading-[140%]">{username}</span>
                 <ArrowSquareIcon className="w-[18px] h-[18px]" />
             </button>
