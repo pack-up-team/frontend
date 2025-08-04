@@ -1,6 +1,222 @@
+import { useState } from "react";
+import Header from "../../components/Header";
+import Button from "../../components/Button";
+import { AddIcon } from "../../assets";
+import AlignDropdown from "./components/AlignDropdown";
+import CategoryTabs from "./components/CategoryTabs";
+import TemplateGrid from "./components/TemplateGrid";
+import EmptyState from "./components/EmptyState";
+import Footer from "../../components/Footer";
+import type { TemplateListItem } from "../../stores/templateListStore";
+
 const DashboardPage = () => {
+    // 선택된 카테고리 상태
+    const [selectedCategory, setSelectedCategory] = useState("전체");
+
+    // 카테고리별 개수 상태
+    // const [categoryCounts, setCategoryCounts]
+    const [categoryCounts] = useState({
+        전체: 4,
+        즐겨찾기: 1,
+        업무: 1,
+        생활: 1,
+        여행: 2,
+    });
+
+    // 더미 데이터
+    const dummyTemplates: TemplateListItem[] = [
+        {
+        templateNo: 1,
+        templateNm: "출근 준비",
+        categoryNm: "업무",
+        regDt: "2025-08-01T10:00:00Z",
+        updDt: "2025-08-01T10:00:00Z",
+        isBookmarked: true,
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 2,
+        templateNm: "여행 짐 싸기",
+        categoryNm: "여행",
+        regDt: "2025-07-30T14:00:00Z",
+        updDt: "2025-07-30T14:00:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 3,
+        templateNm: "주간 업무 점검",
+        categoryNm: "업무",
+        regDt: "2025-07-29T08:30:00Z",
+        updDt: "2025-07-29T10:00:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 4,
+        templateNm: "헬스장 갈 준비",
+        categoryNm: "생활",
+        regDt: "2025-07-28T18:00:00Z",
+        updDt: "2025-07-29T09:00:00Z",
+        isBookmarked: true,
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 5,
+        templateNm: "출국 서류 확인",
+        categoryNm: "여행",
+        regDt: "2025-07-27T09:15:00Z",
+        updDt: "2025-07-27T09:15:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 6,
+        templateNm: "회의 준비",
+        categoryNm: "업무",
+        regDt: "2025-07-26T13:45:00Z",
+        updDt: "2025-07-26T14:30:00Z",
+        isBookmarked: true,
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 7,
+        templateNm: "청소하기",
+        categoryNm: "생활",
+        regDt: "2025-07-25T17:00:00Z",
+        updDt: "2025-07-25T17:00:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 8,
+        templateNm: "장보기 리스트",
+        categoryNm: "생활",
+        regDt: "2025-07-24T16:30:00Z",
+        updDt: "2025-07-24T16:30:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 9,
+        templateNm: "운동 루틴",
+        categoryNm: "생활",
+        regDt: "2025-07-23T19:10:00Z",
+        updDt: "2025-07-23T19:10:00Z",
+        isBookmarked: true,
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 10,
+        templateNm: "회사 행사 준비",
+        categoryNm: "업무",
+        regDt: "2025-07-22T11:00:00Z",
+        updDt: "2025-07-22T12:00:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 11,
+        templateNm: "일정 정리",
+        categoryNm: "업무",
+        regDt: "2025-07-21T15:30:00Z",
+        updDt: "2025-07-21T15:30:00Z",
+        isBookmarked: true,
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+        {
+        templateNo: 12,
+        templateNm: "국내 여행 코스",
+        categoryNm: "여행",
+        regDt: "2025-07-20T12:00:00Z",
+        updDt: "2025-07-20T13:00:00Z",
+        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+        },
+    ];
+
+    // 전체 템플릿 데이터
+    // const [allTemplates, setAllTemplates]
+    const [allTemplates] = useState<TemplateListItem[]>(dummyTemplates);
+    // 현재 화면에 보여줄 개수
+    const [visibleCount, setVisibleCount] = useState(8);
+
+    // onAlignChange: (option: string) => void;
+    const handleAlignChange = (option: string) => {
+        alert(option);
+    };
+
+    // onChange: (category: string) => void;
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        setVisibleCount(8);
+        // 선택된 카테고리에 맞춰 템플릿 목록 API 호출
+    };
+
+    /*
+    // 템플릿 불러오기 (API)
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            try {
+                const res = await axios.get("/api/templates", {
+                    params: { category: selectedCategory },
+                });
+                setAllTemplates(res.data); // ✅ 예: [{ templateNo: 1, title: "...", ... }]
+            } catch (err) {
+                console.error("템플릿 불러오기 실패:", err);
+            }
+        };
+
+        fetchTemplates();
+    }, [selectedCategory]);
+    */
+
+    /*
+    // 카테고리별 개수 불러오기 (API)
+    useEffect(() => {
+        const fetchCategoryCounts = async () => {
+            try {
+                const res = await axios.get("/api/dashboard/categories");
+                // 🔗 예시 응답: { 전체: 12, 즐겨찾기: 2, 업무: 5, 생활: 3, 여행: 1 }
+                setCategoryCounts(res.data);
+            } catch (err) {
+                console.error("카테고리 개수 불러오기 실패:", err);
+            }
+        };
+
+        fetchCategoryCounts();
+    }, []);
+    */
+
+    // 현재 보여줄 템플릿 목록
+    const visibleTemplates = allTemplates.slice(0, visibleCount);
+
     return (
-        <div></div>
+        <div className='flex w-full flex-col items-start gap-[8px] bg-[#FAFAFA] min-h-screen'>
+            <div className="flex flex-col items-center gap-[40px] mb-[40px] self-stretch flex-1">
+                <Header />
+                <div className="pt-[124px] mx-auto flex w-[1200px] justify-between items-center">
+                    <div className="flex items-center gap-[31px]">
+                        <h2 className="text-[#141414] text-center font-pretendard text-[26px] font-bold leading-normal">내 템플릿 목록</h2>
+                        <Button className="w-[200px] h-11">
+                            <AddIcon className="w-[18px] h-[18px]" />
+                            <span className="text-white text-center font-pretendard text-[16px] font-medium leading-normal">새 템플릿</span>
+                        </Button>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-[#141414] font-pretendard text-[16px] font-medium leading-normal">정렬</span>
+                        <AlignDropdown onAlignChange={handleAlignChange} />
+                    </div>
+                </div>
+                <section className="flex w-[1200px] flex-col items-center gap-[32px]">
+                    <CategoryTabs counts={categoryCounts} selected={selectedCategory} onChange={handleCategoryChange} />
+                    {allTemplates.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        <>
+                            <TemplateGrid templates={visibleTemplates} />
+                            {visibleCount < allTemplates.length && (
+                                <Button onClick={() => setVisibleCount(prev => prev + 8)} className="w-[343px] h-[50px]" variant="line">더보기</Button>
+                            )}
+                        </>
+                    )}
+                </section>
+            </div>
+            <Footer />
+        </div>
     );
 };
 
