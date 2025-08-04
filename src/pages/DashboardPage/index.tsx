@@ -104,10 +104,10 @@ const DashboardPage = () => {
     // 카테고리별 개수 상태
     // const [categoryCounts, setCategoryCounts]
     const [categoryCounts] = useState({
-        전체: 4,
-        즐겨찾기: 1,
-        업무: 1,
-        생활: 1,
+        전체: 10,
+        즐겨찾기: 4,
+        업무: 4,
+        생활: 4,
         여행: 2,
     });
 
