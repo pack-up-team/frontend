@@ -9,6 +9,94 @@ import EmptyState from "./components/EmptyState";
 import Footer from "../../components/Footer";
 import type { TemplateListItem } from "../../stores/templateListStore";
 
+// 더미 데이터
+const DUMMY_TEMPLATES: TemplateListItem[] = [
+    {
+    templateNo: 1,
+    templateNm: "출근 준비",
+    categoryNm: "업무",
+    regDt: "2025-08-01T10:00:00Z",
+    updDt: "2025-08-01T10:00:00Z",
+    isBookmarked: true,
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 2,
+    templateNm: "여행 짐 싸기",
+    categoryNm: "여행",
+    regDt: "2025-07-30T14:00:00Z",
+    updDt: "2025-07-30T14:00:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 3,
+    templateNm: "주간 업무 점검",
+    categoryNm: "업무",
+    regDt: "2025-07-29T08:30:00Z",
+    updDt: "2025-07-29T10:00:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 4,
+    templateNm: "헬스장 갈 준비",
+    categoryNm: "생활",
+    regDt: "2025-07-28T18:00:00Z",
+    updDt: "2025-07-29T09:00:00Z",
+    isBookmarked: true,
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 5,
+    templateNm: "출국 서류 확인",
+    categoryNm: "여행",
+    regDt: "2025-07-27T09:15:00Z",
+    updDt: "2025-07-27T09:15:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 6,
+    templateNm: "회의 준비",
+    categoryNm: "업무",
+    regDt: "2025-07-26T13:45:00Z",
+    updDt: "2025-07-26T14:30:00Z",
+    isBookmarked: true,
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 7,
+    templateNm: "청소하기",
+    categoryNm: "생활",
+    regDt: "2025-07-25T17:00:00Z",
+    updDt: "2025-07-25T17:00:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 8,
+    templateNm: "장보기 리스트",
+    categoryNm: "생활",
+    regDt: "2025-07-24T16:30:00Z",
+    updDt: "2025-07-24T16:30:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 9,
+    templateNm: "운동 루틴",
+    categoryNm: "생활",
+    regDt: "2025-07-23T19:10:00Z",
+    updDt: "2025-07-23T19:10:00Z",
+    isBookmarked: true,
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+    {
+    templateNo: 10,
+    templateNm: "회사 행사 준비",
+    categoryNm: "업무",
+    regDt: "2025-07-22T11:00:00Z",
+    updDt: "2025-07-22T12:00:00Z",
+    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+    },
+];
+
 const DashboardPage = () => {
     // 선택된 카테고리 상태
     const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -23,110 +111,30 @@ const DashboardPage = () => {
         여행: 2,
     });
 
-    // 더미 데이터
-    const dummyTemplates: TemplateListItem[] = [
-        {
-        templateNo: 1,
-        templateNm: "출근 준비",
-        categoryNm: "업무",
-        regDt: "2025-08-01T10:00:00Z",
-        updDt: "2025-08-01T10:00:00Z",
-        isBookmarked: true,
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 2,
-        templateNm: "여행 짐 싸기",
-        categoryNm: "여행",
-        regDt: "2025-07-30T14:00:00Z",
-        updDt: "2025-07-30T14:00:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 3,
-        templateNm: "주간 업무 점검",
-        categoryNm: "업무",
-        regDt: "2025-07-29T08:30:00Z",
-        updDt: "2025-07-29T10:00:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 4,
-        templateNm: "헬스장 갈 준비",
-        categoryNm: "생활",
-        regDt: "2025-07-28T18:00:00Z",
-        updDt: "2025-07-29T09:00:00Z",
-        isBookmarked: true,
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 5,
-        templateNm: "출국 서류 확인",
-        categoryNm: "여행",
-        regDt: "2025-07-27T09:15:00Z",
-        updDt: "2025-07-27T09:15:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 6,
-        templateNm: "회의 준비",
-        categoryNm: "업무",
-        regDt: "2025-07-26T13:45:00Z",
-        updDt: "2025-07-26T14:30:00Z",
-        isBookmarked: true,
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 7,
-        templateNm: "청소하기",
-        categoryNm: "생활",
-        regDt: "2025-07-25T17:00:00Z",
-        updDt: "2025-07-25T17:00:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 8,
-        templateNm: "장보기 리스트",
-        categoryNm: "생활",
-        regDt: "2025-07-24T16:30:00Z",
-        updDt: "2025-07-24T16:30:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 9,
-        templateNm: "운동 루틴",
-        categoryNm: "생활",
-        regDt: "2025-07-23T19:10:00Z",
-        updDt: "2025-07-23T19:10:00Z",
-        isBookmarked: true,
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-        {
-        templateNo: 10,
-        templateNm: "회사 행사 준비",
-        categoryNm: "업무",
-        regDt: "2025-07-22T11:00:00Z",
-        updDt: "2025-07-22T12:00:00Z",
-        thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-        },
-    ];
-
     // 전체 템플릿 데이터
-    // const [allTemplates, setAllTemplates]
-    const [allTemplates] = useState<TemplateListItem[]>(dummyTemplates);
+    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>(DUMMY_TEMPLATES);
     // 현재 화면에 보여줄 개수
     const [visibleCount, setVisibleCount] = useState(8);
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
-        alert(option);
+        alert(option); // 정렬 기능은 이후 구현
     };
 
     // onChange: (category: string) => void;
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
         setVisibleCount(8);
-        // 선택된 카테고리에 맞춰 템플릿 목록 API 호출
+
+        // TODO: 나중에 백엔드 API 연결 시 여기를 API 호출로 대체
+        // 선택된 카테고리에 맞게 필터링
+        if (category === "전체") {
+            setAllTemplates(DUMMY_TEMPLATES);
+        } else if (category === "즐겨찾기") {
+            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.isBookmarked));
+        } else {
+            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.categoryNm === category));
+        }
     };
 
     /*

@@ -25,7 +25,7 @@ const TemplateGrid: React.FC<TemplateGridProps> = ({ templates }) => {
                             onDuplicate={() => {}}
                             onDelete={() => {}} />
                         ) : (
-                            <div key={`placeholder-${rowIdx}-${idx}`} className="w-[272px] h-[367px] bg-transparent"></div>
+                            <div key={`placeholder-${rowIdx}-${idx}`} className="w-[276px] h-[374px] bg-transparent"></div>
                         )
                     )}
                 </div>

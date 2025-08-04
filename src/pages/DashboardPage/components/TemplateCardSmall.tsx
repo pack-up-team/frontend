@@ -122,7 +122,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
                 {template.categoryNm && (
                     <div className="flex items-center">
                         <div className="flex px-[8px] py-[4px] justify-center items-center gap-[8px] rounded-[2px] bg-[#F6F4FF]">
-                            <span className="text-[#775CFF] font-pretendard text-[14px] font-semibold leading-normal overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">{template.categoryNm}</span>
+                            <span className="text-[#775CFF] font-pretendard text-[14px] font-semibold leading-[20px] overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">{template.categoryNm}</span>
                         </div>
                     </div>
                 )}
