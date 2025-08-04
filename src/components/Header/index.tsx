@@ -62,22 +62,30 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     ];
     // onMarkAllRead: () => void;
     const handleMarkAllRead = () => {
-        alert("알림 전체 읽음");
+        // TODO: 모든 알림을 읽음 처리하는 기능을 여기에 구현하세요
+        console.log("모든 알림을 읽음 처리합니다.");
+        // 예시: notificationService.markAllAsRead();
     };
     // onClickNotification: (id: number) => void;
     const handleClickNotification = (id: number) => {
-        alert(`알림 ${id} 클릭됨`);
+        // TODO: 알림 클릭 시 상세 페이지 이동 또는 상태 업데이트 로직을 구현하세요
+        console.log(`알림 ${id}번 클릭됨`);
+        // 예시: navigate(`/notification/${id}`);
     };
 
     // username: string;
     const username = "심심한알파카59223";
     // onLogout: () => void;
     const handleLogout = () => {
-        alert("로그아웃 완료");
+        // TODO: 실제 로그아웃 처리 로직을 여기에 구현하세요
+        console.log("사용자 로그아웃 처리");
+        // 예시: authService.logout(); navigate('/');
     };
     // onMyPage: () => void;
     const handleMyPage = () => {
-        alert("마이페이지 이동");
+        // TODO: 마이페이지로 이동하는 기능을 구현하세요
+        console.log("마이페이지로 이동합니다.");
+        // 예시: navigate('/mypage');
     };
 
     return (
