@@ -35,14 +35,14 @@ const LoginForm = () => {
                 userPw: data.password
             };
     
-            const response = await fetch('https://packupapi.xyz/api/lgn/login', {
+            const response = await fetch('http://localhost:8080/api/lgn/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(loginData)
             });
-    
+
             if (!response.ok) {
                 throw new Error('로그인 실패');
             }
@@ -76,8 +76,21 @@ const LoginForm = () => {
         } catch (error) {
             console.error(`${provider} 로그인 오류:`, error);
             alert('SNS 로그인 중 오류가 발생했습니다.');
+            
         }
     };
+
+    // types/auth.ts - 타입 정의
+    interface LoginRequest {
+        email: string;
+        password: string;
+    }
+
+    interface LoginResponse {
+        token: string;
+        userId: string;
+        email: string;
+    }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-center gap-8'>
@@ -124,7 +137,7 @@ const LoginForm = () => {
                 </div>
                 {/* actions */}
                 <div className='flex flex-col items-center gap-8'>
-                    <Button type='submit' className='w-[343px] h-[50px]'>이메일 로그인</Button>
+                    <Button type='submit' className='w-[343px] h-[50px]' >이메일 로그인</Button>
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         {/* 구분선 */}
                         <div className='flex w-[343px] items-center gap-3'>

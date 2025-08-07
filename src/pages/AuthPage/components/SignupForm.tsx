@@ -46,6 +46,7 @@ const SignupForm = () => {
         setAgreements(prev => ({ ...prev, [key]: value }));
     };
 
+    // 임시 onSubmit
     const onSubmit = async (data: SignupFormData) => {
         if (!agreements.terms || !agreements.privacy) {
             alert('필수 항목에 동의해야 합니다.');
@@ -62,7 +63,8 @@ const SignupForm = () => {
                 mktAgree: agreements.marketing
             };
 
-            const response = await fetch('https://packupapi.xyz/register/userRegister', {
+
+            const response = await fetch('http://localhost:8080/register/userRegister', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -74,11 +76,18 @@ const SignupForm = () => {
                 throw new Error('회원가입 실패');
             }
 
+
             alert('회원가입이 완료되었습니다.');
-            navigate('/auth');
+            // 회원가입 성공 confirm 창 표시 후 로그인 페이지로 이동
+            if (window.confirm('회원가입이 완료되었습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                navigate('/auth');
+            }
         } catch (error) {
             console.error('회원가입 실패: ', error);
             alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+            
+            
+            
         }
     };
 

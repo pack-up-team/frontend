@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 // import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
@@ -183,7 +184,7 @@ const DashboardPage = () => {
             setIsLoadingMore(true);
         }
 
-        try {
+         try {
             const categoryValue = getCategoryValue(selectedCategory);
             const requestBody: {
                 page: number;
