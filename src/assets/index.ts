@@ -30,3 +30,5 @@ export { default as MyPageIcon } from './my-page.svg?react';
 export { default as LogoutIcon } from './logout.svg?react';
 export { default as ArrowSquareIcon } from './arrow-square.svg?react';
 export { default as AddIcon } from './add.svg?react';
+export { default as ArrowLeftIcon } from './arrow-left.svg?react';
+export { default as ArrowRightIcon } from './arrow-right.svg?react';
