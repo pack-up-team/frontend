@@ -81,9 +81,12 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
+                const token = localStorage.getItem('token');
+
                 const response = await fetch("https://packupapi.xyz/api/user", {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                     credentials: 'include' // 쿠키의 JWT 토큰 자동 포함

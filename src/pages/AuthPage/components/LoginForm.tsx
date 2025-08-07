@@ -40,6 +40,7 @@ const LoginForm = () => {
             }
 
             const result: LoginResponse = await response.json();
+            localStorage.setItem('token', result.token);
             console.log('로그인 성공:', result);
             
             // 로그인 성공 시 대시보드 페이지로 이동
