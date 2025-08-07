@@ -36,3 +36,8 @@ export { default as ViewToggleOffIcon } from './view-toggle-off.svg?react';
 export { default as ViewToggleOnIcon } from './view-toggle-on.svg?react';
 export { default as DividerIcon } from './divider.svg?react';
 export { default as ModalOpenIcon } from './modal-open.svg?react';
+export { default as ViewInstaIcon } from './view-insta.svg?react';
+export { default as ViewKakaoIcon } from './view-kakao.svg?react';
+export { default as ViewLinkIcon } from './view-link.svg?react';
+export { default as ViewShareIcon } from './view-share.svg?react';
+export { default as ViewCheckboxIcon } from './view-checkbox.svg?react';
