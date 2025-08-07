@@ -34,7 +34,7 @@ const LoginForm = () => {
                 userId: data.email,
                 userPw: data.password
             };
-    
+            
             const response = await fetch('https://packupapi.xyz/api/lgn/login', {
                 method: 'POST',
                 headers: {
