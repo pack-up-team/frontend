@@ -1,4 +1,5 @@
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/Button';
 import FormInput from '../../../components/FormInput';
 import { GoogleIcon, KakaoIcon, NaverIcon } from '../../../assets';
@@ -8,15 +9,42 @@ type LoginFormData = {
     password: string;
 };
 
+interface LoginRequest {
+    userId: string;
+    userPw: string;
+}
+
 const LoginForm = () => {
+    const navigate = useNavigate();
     const { control, handleSubmit } = useForm<LoginFormData>({
         defaultValues: { email: '', password: '' },
         mode: 'onChange', // 실시간 validation
     });
 
-    // 임시 onSubmit
-    const onSubmit = (data: LoginFormData) => {
-        console.log(data);
+    const onSubmit = async (data: LoginFormData) => {
+        try {
+            const loginData: LoginRequest = {
+                userId: data.email,
+                userPw: data.password
+            };
+    
+            const response = await fetch('https://packupapi.xyz/api/lgn/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // JWT 쿠키 자동 전송
+                body: JSON.stringify(loginData)
+            });
+    
+            if (!response.ok) {
+                throw new Error('로그인 실패');
+            }
+
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('로그인 실패: ', error);
+        }
     };
 
     return (
