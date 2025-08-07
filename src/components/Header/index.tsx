@@ -81,7 +81,7 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/user", {
+                const response = await fetch("https://packupapi.xyz/api/user", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
