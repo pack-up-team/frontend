@@ -14,6 +14,12 @@ interface LoginRequest {
     userPw: string;
 }
 
+interface LoginResponse {
+    token: string;
+    userId: string;
+    username: string;
+}
+
 const LoginForm = () => {
     const navigate = useNavigate();
     const { control, handleSubmit } = useForm<LoginFormData>({
@@ -40,6 +46,9 @@ const LoginForm = () => {
             if (!response.ok) {
                 throw new Error('로그인 실패');
             }
+
+            const result: LoginResponse = await response.json();
+            localStorage.setItem('token', result.token);
 
             navigate('/dashboard');
         } catch (error) {
