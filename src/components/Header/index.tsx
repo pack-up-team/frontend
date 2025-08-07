@@ -248,7 +248,7 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
 
         return () => controller.abort();
     }, [userId]);
-    
+
     // onLogout: () => void;
     const handleLogout = async () => {
         try {

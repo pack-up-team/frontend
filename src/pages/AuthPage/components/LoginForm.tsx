@@ -35,7 +35,7 @@ const LoginForm = () => {
                 userPw: data.password
             };
     
-            const response = await fetch('http://localhost:8080/api/lgn/login', {
+            const response = await fetch('https://packupapi.xyz/api/lgn/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -82,8 +82,8 @@ const LoginForm = () => {
 
     // types/auth.ts - 타입 정의
     interface LoginRequest {
-        email: string;
-        password: string;
+        userId: string;
+        userPw: string;
     }
 
     interface LoginResponse {

@@ -64,7 +64,7 @@ const SignupForm = () => {
             };
 
 
-            const response = await fetch('http://localhost:8080/register/userRegister', {
+            const response = await fetch('https://packupapi.xyz/register/userRegister', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
