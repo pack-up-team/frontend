@@ -19,6 +19,16 @@ interface ApiTemplate {
     isFavorite?: string;
 }
 
+// 정렬 옵션 매핑
+const SORT_OPTIONS = {
+    "최근 수정일": 0,
+    "최근 생성일": 1,
+    "알림 시간 임박": 2,
+    "템플릿명": 3
+} as const;
+
+type SortOption = keyof typeof SORT_OPTIONS;
+
 // 더미 데이터
 const DUMMY_TEMPLATES: TemplateListItem[] = [
     {
@@ -111,6 +121,8 @@ const DUMMY_TEMPLATES: TemplateListItem[] = [
 const DashboardPage = () => {
     // 선택된 카테고리 상태
     const [selectedCategory, setSelectedCategory] = useState("전체");
+    // 선택된 정렬 기준 상태
+    const [selectedAlign, setSelectedAlign] = useState<SortOption>("최근 수정일");
 
     // 카테고리별 개수 상태
     // const [categoryCounts, setCategoryCounts]
@@ -129,9 +141,38 @@ const DashboardPage = () => {
     // 현재 화면에 보여줄 개수
     const [visibleCount, setVisibleCount] = useState(8);
 
+    // 템플릿 정렬 함수
+    const sortTemplates = (templates: TemplateListItem[], sortBy: string): TemplateListItem[] => {
+        const sorted = [...templates];
+        
+        switch (sortBy) {
+            case "최근 수정일":
+                return sorted.sort((a, b) => new Date(b.updDt).getTime() - new Date(a.updDt).getTime());
+            case "최근 생성일":
+                return sorted.sort((a, b) => new Date(b.regDt).getTime() - new Date(a.regDt).getTime());
+            case "알림 시간 임박":
+                return sorted.sort((a, b) => {
+                    if (!a.alarmDt && !b.alarmDt) return 0;
+                    if (!a.alarmDt) return 1;
+                    if (!b.alarmDt) return -1;
+                    return new Date(a.alarmDt).getTime() - new Date(b.alarmDt).getTime();
+                });
+            case "템플릿명":
+                return sorted.sort((a, b) => a.templateNm.localeCompare(b.templateNm));
+            default:
+                return sorted;
+        }
+    };
+
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
-        alert(option); // 정렬 기능은 이후 구현
+        const sortOption = option as SortOption;
+        setSelectedAlign(sortOption);
+        // 현재 템플릿 목록을 새로운 정렬 기준으로 정렬
+        setAllTemplates(prev => sortTemplates(prev, sortOption));
+        
+        // API를 다시 호출하여 정렬된 데이터를 가져오기
+        fetchTemplates();
     };
 
     // onChange: (category: string) => void;
@@ -141,13 +182,17 @@ const DashboardPage = () => {
 
         // TODO: 나중에 백엔드 API 연결 시 여기를 API 호출로 대체
         // 선택된 카테고리에 맞게 필터링
+        let filteredTemplates;
         if (category === "전체") {
-            setAllTemplates(DUMMY_TEMPLATES);
+            filteredTemplates = DUMMY_TEMPLATES;
         } else if (category === "즐겨찾기") {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.isBookmarked));
+            filteredTemplates = DUMMY_TEMPLATES.filter(t => t.isBookmarked);
         } else {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.categoryNm === category));
+            filteredTemplates = DUMMY_TEMPLATES.filter(t => t.categoryNm === category);
         }
+        
+        // 현재 선택된 정렬 기준으로 정렬하여 설정
+        setAllTemplates(sortTemplates(filteredTemplates, selectedAlign));
     };
 
     // 템플릿 불러오기 (API) - POST 방식으로 변경
@@ -155,7 +200,7 @@ const DashboardPage = () => {
         const fetchTemplates = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
+                const response = await fetch("http://localhost:8080/temp/getUserTemplateDataList", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -163,7 +208,8 @@ const DashboardPage = () => {
                     credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
                     body: JSON.stringify({
                         category: selectedCategory,
-                        page: 1
+                        page: 1,
+                        sort: SORT_OPTIONS[selectedAlign] // 정렬 기준 숫자 값 전달
                     })
                 });
 
@@ -190,11 +236,12 @@ const DashboardPage = () => {
                     thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
                 }));
                 
-                setAllTemplates(convertedTemplates);
+                // 현재 선택된 정렬 기준으로 정렬하여 설정
+                setAllTemplates(sortTemplates(convertedTemplates, selectedAlign));
             } catch (err) {
                 console.error("템플릿 불러오기 실패:", err);
                 // 에러 시 더미 데이터 사용
-                setAllTemplates(DUMMY_TEMPLATES);
+                setAllTemplates(sortTemplates(DUMMY_TEMPLATES, selectedAlign));
             } finally {
                 setIsLoading(false);
             }
@@ -237,7 +284,7 @@ const DashboardPage = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-[#141414] font-pretendard text-[16px] font-medium leading-normal">정렬</span>
-                        <AlignDropdown onAlignChange={handleAlignChange} />
+                        <AlignDropdown selectedAlign={selectedAlign} onAlignChange={handleAlignChange} />
                     </div>
                 </div>
                 <section className="flex w-[1200px] flex-col items-center gap-[32px]">
