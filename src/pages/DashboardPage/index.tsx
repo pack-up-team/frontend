@@ -120,148 +120,77 @@ const DashboardPage = () => {
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
-        setSelectedAlign(option);
-        // 선택값만 갱신; 데이터 로드는 useEffect에서 처리
+        alert(option); // 정렬 기능은 이후 구현
     };
 
     // onChange: (category: string) => void;
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
-        // 선택값만 갱신; 데이터 로드는 useEffect에서 처리
-    };
+        setVisibleCount(8);
 
-    // 즐겨찾기 상태 변경 시 템플릿 목록 새로고침
-    const handleBookmarkToggle = () => {
-        setCurrentPage(1);
-        setAllTemplates([]);
-        setHasMore(true);
-        fetchTemplates(undefined, 1, true);
-    };
-
-    // 카테고리를 API 값으로 변환하는 함수
-    const getCategoryValue = (category: string) => {
-        switch (category) {
-            case "전체":
-                return "";
-            case "즐겨찾기":
-                return "0";
-            case "업무":
-                return "1";
-            case "생활":
-                return "2";
-            case "여행":
-                return "3";
-            default:
-                return undefined;
-        }
-    };
-
-    // 정렬 기준을 API 값으로 변환하는 함수
-    const getAlignValue = (align: string) => {
-        switch (align) {
-            case "최근 수정일":
-                return 0;
-            case "최근 생성일":
-                return 1;
-            case "알림 시간 임박":
-                return 2;
-            case "템플릿명":
-                return 3;
-            default:
-                return 0;
-        }
-    };
-
-    // 템플릿 불러오기 함수
-    const fetchTemplates = useCallback(async (alignOption?: string, page?: number, isReset?: boolean) => {
-        const targetPage = page || currentPage;
-        const sortOption = alignOption || selectedAlign;
-        const token = localStorage.getItem('token');
-
-        if (isReset) {
-            setIsLoading(true);
+        // TODO: 나중에 백엔드 API 연결 시 여기를 API 호출로 대체
+        // 선택된 카테고리에 맞게 필터링
+        if (category === "전체") {
+            setAllTemplates(DUMMY_TEMPLATES);
+        } else if (category === "즐겨찾기") {
+            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.isBookmarked));
         } else {
-            setIsLoadingMore(true);
+            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.categoryNm === category));
         }
+    };
 
-         try {
-            const categoryValue = getCategoryValue(selectedCategory);
-            const requestBody: {
-                page: number;
-                sort: number;
-                cateNo?: string;
-            } = {
-                page: targetPage,
-                sort: getAlignValue(sortOption)
-            };
-
-            // 전체가 아닌 경우에만 category 필드 추가
-            if (categoryValue) {
-                requestBody.cateNo = categoryValue;
-            }
-
-            console.log('API 요청:', requestBody);
-
-            const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                throw new Error('템플릿 불러오기 실패');
-            }
-
-            const responseData = await response.json();
-            console.log('API 응답:', responseData);
-
-            const templates = responseData.templateDataList || [];
-            const templateCntList: TemplateCntList = responseData.templateCntList;
-
-            // 카테고리 개수 업데이트 (첫 페이지일 때만)
-            if (targetPage === 1 && templateCntList) {
-                setCategoryCounts({
-                    전체: templateCntList.totalCnt,
-                    즐겨찾기: templateCntList.totalFavoriteCnt,
-                    업무: templateCntList.totalOfficeCnt,
-                    생활: templateCntList.totalDailyCnt,
-                    여행: templateCntList.totalTripCnt,
+    // 템플릿 불러오기 (API) - POST 방식으로 변경
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            setIsLoading(true);
+            try {
+                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
+                    body: JSON.stringify({
+                        category: selectedCategory,
+                        page: 1
+                    })
                 });
-            }
-            const convertedTemplates = templates.map((template: ApiTemplate) => ({
-                templateNo: template.templateNo,
-                templateNm: template.templateNm,
-                categoryNm: template.cateNm,
-                regDt: template.regDt,
-                updDt: template.updDt || template.regDt,
-                isBookmarked: template.isFavorite === "Y",
-                thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-            }));
 
-            // 첫 페이지이거나 리셋인 경우 새로 설정, 아니면 기존 데이터에 추가
-            if (isReset || targetPage === 1) {
+                if (!response.ok) {
+                    throw new Error('템플릿 불러오기 실패');
+                }
+                
+                console.log("템플릿 데이터 response :", response);
+
+                const responseData = await response.json();
+                console.log("템플릿 데이터:", responseData);
+                
+                // responseData.templateDataList에서 실제 템플릿 배열 추출
+                const templates = responseData.templateDataList || [];
+                
+                // API 데이터를 기존 TemplateListItem 형식에 맞게 변환
+                const convertedTemplates = templates.map((template: ApiTemplate) => ({
+                    templateNo: template.templateNo,
+                    templateNm: template.templateNm,
+                    categoryNm: template.cateNm, // 카테고리 정보가 없으면 기본값 설정
+                    regDt: template.regDt,
+                    updDt: template.updDt || template.regDt,
+                    isBookmarked: template.isFavorite === "Y",
+                    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+                }));
+                
                 setAllTemplates(convertedTemplates);
-            } else {
-                setAllTemplates(prev => [...prev, ...convertedTemplates]);
-            }
-
-            // 더 가져올 데이터가 있는지 확인 (가져온 데이터가 8개 미만이면 마지막 페이지)
-            setHasMore(templates.length >= 8);
-            setCurrentPage(targetPage);
-
-        } catch (err) {
-            console.error("템플릿 불러오기 실패:", err);
-            if (isReset || targetPage === 1) {
+            } catch (err) {
+                console.error("템플릿 불러오기 실패:", err);
+                // 에러 시 더미 데이터 사용
                 setAllTemplates(DUMMY_TEMPLATES);
+            } finally {
+                setIsLoading(false);
             }
-        } finally {
-            setIsLoading(false);
-            setIsLoadingMore(false);
-        }
-    }, [selectedCategory, selectedAlign]);
+        };
+
+        fetchTemplates();
+    }, [selectedCategory]);
 
     useEffect(() => {
         setCurrentPage(1);
