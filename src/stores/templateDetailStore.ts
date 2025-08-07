@@ -36,13 +36,13 @@ interface TemplateData {
     alarmTime?: string | null;
 }
 
-interface TemplateState {
+interface TemplateDetailState {
     templateData: TemplateData | null;
     setTemplateData: (data: TemplateData) => void;
     clearTemplate: () => void;
 }
 
-export const useTemplateStore = create<TemplateState>((set) => ({
+export const useTemplateDetailStore = create<TemplateDetailState>((set) => ({
     templateData: null,
 
     setTemplateData: (data) => set({ templateData: data }),
