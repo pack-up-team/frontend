@@ -78,15 +78,21 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     // 사용자 정보 불러오기(JWT 토큰으로 인증)
     useEffect(() => {
         if (!isDefaultPage) return;
+
+        const abortController = new AbortController();
         
         const fetchUserInfo = async () => {
             try {
+                const token = localStorage.getItem('token');
+
                 const response = await fetch("https://packupapi.xyz/api/user", {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include' // 브라우저가 JWT 토큰 쿠키 자동 전송
+                    credentials: 'include', // 브라우저가 JWT 토큰 쿠키 자동 전송
+                    signal: abortController.signal
                 });
 
                 if (!response.ok) {
@@ -98,12 +104,17 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
                 // 다양한 키 중 첫 번째 존재하는 것 사용
                 setUsername(userInfo.username || userInfo.userName || userInfo.userId || userInfo.email || "심심한알파카59223");
             } catch (err) {
+                if (err instanceof Error && err.name === 'AbortError') return;
                 console.error("사용자 정보 불러오기 실패: ", err);
                 setUsername("심심한알파카59223");
             }
         };
 
         fetchUserInfo();
+
+        return () => {
+            abortController.abort();
+        };
     }, [isDefaultPage]);
 
     // onLogout: () => void;
