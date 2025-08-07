@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -188,7 +188,7 @@ const DashboardPage = () => {
     };
 
     // 템플릿 불러오기 함수
-    const fetchTemplatesWithSort = async (alignOption?: string) => {
+    const fetchTemplatesWithSort = useCallback(async (alignOption?: string) => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
         console.log("token : "+token)
@@ -257,12 +257,12 @@ const DashboardPage = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedCategory, selectedAlign]);
 
     // 템플릿 불러오기 (API) - POST 방식으로 변경
     useEffect(() => {
         fetchTemplatesWithSort();
-    }, [selectedCategory, selectedAlign]);
+    }, [fetchTemplatesWithSort]);
 
     /*
     // 카테고리별 개수 불러오기 (API)
