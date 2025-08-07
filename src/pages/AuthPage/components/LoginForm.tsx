@@ -26,7 +26,7 @@ const LoginForm = () => {
                 userPw: data.password // Controller에서 입력받은 비밀번호
             };
 
-            const response = await fetch('http://localhost:8080/api/lgn/login', {
+            const response = await fetch('https://packupapi.xyz/api/lgn/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

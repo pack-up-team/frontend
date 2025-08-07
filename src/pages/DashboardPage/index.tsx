@@ -155,7 +155,7 @@ const DashboardPage = () => {
         const fetchTemplates = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch("http://localhost:8080/temp/getUserTemplateDataList", {
+                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
