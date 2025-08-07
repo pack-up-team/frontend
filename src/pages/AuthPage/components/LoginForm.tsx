@@ -51,8 +51,8 @@ const LoginForm = () => {
     };
 
     interface LoginRequest {
-        email: string;
-        password: string;
+        userId: string;
+        userPw: string;
     }
 
     interface LoginResponse {

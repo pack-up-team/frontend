@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -168,11 +168,7 @@ const DashboardPage = () => {
     const handleAlignChange = (option: string) => {
         const sortOption = option as SortOption;
         setSelectedAlign(sortOption);
-        // 현재 템플릿 목록을 새로운 정렬 기준으로 정렬
-        setAllTemplates(prev => sortTemplates(prev, sortOption));
-        
-        // API를 다시 호출하여 정렬된 데이터를 가져오기
-        fetchTemplates();
+        // selectedAlign 변경 시 useEffect가 자동으로 fetchTemplates 호출함
     };
 
     // onChange: (category: string) => void;
@@ -196,59 +192,60 @@ const DashboardPage = () => {
     };
 
     // 템플릿 불러오기 (API) - POST 방식으로 변경
-    useEffect(() => {
-        const fetchTemplates = async () => {
-            setIsLoading(true);
-            try {
-                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
-                    body: JSON.stringify({
-                        category: selectedCategory,
-                        page: 1,
-                        sort: SORT_OPTIONS[selectedAlign] // 정렬 기준 숫자 값 전달
-                    })
-                });
+    const fetchTemplates = useCallback(async () => {
+        console.log("fetchTemplates 호출됨", { selectedCategory, selectedAlign });
+        setIsLoading(true);
+        try {
+            const response = await fetch("https://packupapi.xyz/getUserTemplateDataList", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
+                body: JSON.stringify({
+                    category: selectedCategory,
+                    page: 1,
+                    sort: SORT_OPTIONS[selectedAlign] // 정렬 기준 숫자 값 전달
+                })
+            });
 
-                if (!response.ok) {
-                    throw new Error('템플릿 불러오기 실패');
-                }
-                
-                console.log("템플릿 데이터 response :", response);
-
-                const responseData = await response.json();
-                console.log("템플릿 데이터:", responseData);
-                
-                // responseData.templateDataList에서 실제 템플릿 배열 추출
-                const templates = responseData.templateDataList || [];
-                
-                // API 데이터를 기존 TemplateListItem 형식에 맞게 변환
-                const convertedTemplates = templates.map((template: ApiTemplate) => ({
-                    templateNo: template.templateNo,
-                    templateNm: template.templateNm,
-                    categoryNm: template.cateNm, // 카테고리 정보가 없으면 기본값 설정
-                    regDt: template.regDt,
-                    updDt: template.updDt || template.regDt,
-                    isBookmarked: template.isFavorite === "Y",
-                    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-                }));
-                
-                // 현재 선택된 정렬 기준으로 정렬하여 설정
-                setAllTemplates(sortTemplates(convertedTemplates, selectedAlign));
-            } catch (err) {
-                console.error("템플릿 불러오기 실패:", err);
-                // 에러 시 더미 데이터 사용
-                setAllTemplates(sortTemplates(DUMMY_TEMPLATES, selectedAlign));
-            } finally {
-                setIsLoading(false);
+            if (!response.ok) {
+                throw new Error('템플릿 불러오기 실패');
             }
-        };
+            
+            console.log("템플릿 데이터 response :", response);
 
+            const responseData = await response.json();
+            console.log("템플릿 데이터:", responseData);
+            
+            // responseData.templateDataList에서 실제 템플릿 배열 추출
+            const templates = responseData.templateDataList || [];
+            
+            // API 데이터를 기존 TemplateListItem 형식에 맞게 변환
+            const convertedTemplates = templates.map((template: ApiTemplate) => ({
+                templateNo: template.templateNo,
+                templateNm: template.templateNm,
+                categoryNm: template.cateNm, // 카테고리 정보가 없으면 기본값 설정
+                regDt: template.regDt,
+                updDt: template.updDt || template.regDt,
+                isBookmarked: template.isFavorite === "Y",
+                thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+            }));
+            
+            // 현재 선택된 정렬 기준으로 정렬하여 설정
+            setAllTemplates(sortTemplates(convertedTemplates, selectedAlign));
+        } catch (err) {
+            console.error("템플릿 불러오기 실패:", err);
+            // 에러 시 더미 데이터 사용
+            setAllTemplates(sortTemplates(DUMMY_TEMPLATES, selectedAlign));
+        } finally {
+            setIsLoading(false);
+        }
+    }, [selectedCategory, selectedAlign]);
+
+    useEffect(() => {
         fetchTemplates();
-    }, [selectedCategory]);
+    }, [fetchTemplates]);
 
     /*
     // 카테고리별 개수 불러오기 (API)
