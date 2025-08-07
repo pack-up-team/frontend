@@ -9,6 +9,16 @@ import EmptyState from "./components/EmptyState";
 import Footer from "../../components/Footer";
 import type { TemplateListItem } from "../../stores/templateListStore";
 
+// API 응답 템플릿 타입 정의
+interface ApiTemplate {
+    templateNo: number;
+    templateNm: string;
+    cateNm: string;
+    regDt: string;
+    updDt?: string;
+    isFavorite: "Y" | "N";
+}
+
 // 더미 데이터
 const DUMMY_TEMPLATES: TemplateListItem[] = [
     {
@@ -169,7 +179,7 @@ const DashboardPage = () => {
                 const templates = responseData.templateDataList || [];
                 
                 // API 데이터를 기존 TemplateListItem 형식에 맞게 변환
-                const convertedTemplates = templates.map((template: any) => ({
+                const convertedTemplates = templates.map((template: ApiTemplate) => ({
                     templateNo: template.templateNo,
                     templateNm: template.templateNm,
                     categoryNm: template.cateNm, // 카테고리 정보가 없으면 기본값 설정

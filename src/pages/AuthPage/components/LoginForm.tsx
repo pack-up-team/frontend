@@ -52,8 +52,8 @@ const LoginForm = () => {
 
     // types/auth.ts - 타입 정의
     interface LoginRequest {
-        email: string;
-        password: string;
+        userId: string;
+        userPw: string;
     }
 
     interface LoginResponse {
