@@ -107,6 +107,7 @@ const DUMMY_TEMPLATES: TemplateListItem[] = [
     },
 ];
 
+
 const DashboardPage = () => {
     // 선택된 카테고리 상태
     const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -154,7 +155,7 @@ const DashboardPage = () => {
         const fetchTemplates = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
+                const response = await fetch("http://localhost:8080/temp/getUserTemplateDataList", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
