@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoIcon } from '../../assets';
 import NotificationDropdown from './components/NotificationDropdown';
@@ -73,8 +74,40 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
         // 예시: navigate(`/notification/${id}`);
     };
 
-    // username: string;
-    const username = "심심한알파카59223";
+    // username 상태
+    const [username, setUsername] = useState<string>("심심한알파카59223");
+
+    // 사용자 정보 불러오기 (JWT 토큰으로 인증)
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const response = await fetch("https://packupapi.xyz/api/user", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include' // 쿠키의 JWT 토큰 자동 포함
+                });
+
+                if (!response.ok) {
+                    throw new Error('사용자 정보 불러오기 실패');
+                }
+
+                const userInfo = await response.json();
+                // username 필드가 있으면 사용, 없으면 userId나 email 사용
+                setUsername(userInfo.username || userInfo.userName || userInfo.userId || userInfo.email || "심심한알파카59223");
+            } catch (err) {
+                console.error("사용자 정보 불러오기 실패:", err);
+                // 에러 시 기본값 유지
+                setUsername("심심한알파카59223");
+            }
+        };
+
+        // 기본 페이지일 때만 사용자 정보 가져오기
+        if (isDefaultPage) {
+            fetchUserInfo();
+        }
+    }, [isDefaultPage]);
     // onLogout: () => void;
     const handleLogout = () => {
         // TODO: 실제 로그아웃 처리 로직을 여기에 구현하세요

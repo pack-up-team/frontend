@@ -1,5 +1,6 @@
 import { Controller, useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/Button';
 import FormInput from '../../../components/FormInput';
 import Checkbox from './Checkbox';
@@ -16,6 +17,7 @@ type SignupFormData = {
 };
 
 const SignupForm = () => {
+    const navigate = useNavigate();
     const { control, handleSubmit } = useForm<SignupFormData>({
         defaultValues: {
             email: '',
@@ -45,12 +47,46 @@ const SignupForm = () => {
     };
 
     // 임시 onSubmit
-    const onSubmit = (data: SignupFormData) => {
+    const onSubmit = async (data: SignupFormData) => {
         console.log(data);
         console.log(agreements);
         if (!agreements.terms || !agreements.privacy) {
             alert('필수 항목에 동의해야 합니다.');
             return;
+        }
+
+        try {
+            const signupData = {
+                userId: data.email,
+                phoneNum: data.phone,
+                userPw: data.password,
+                infoAcq: agreements.terms,
+                personalInfoAcq: agreements.privacy,
+                mktAgree: agreements.marketing
+            };
+
+            const response = await fetch('https://packupapi.xyz/register/userRegister', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(signupData)
+            });
+
+            if (!response.ok) {
+                throw new Error('회원가입 실패');
+            }
+
+            const result = await response.json();
+            console.log('회원가입 성공:', result);
+            
+            // 회원가입 성공 confirm 창 표시 후 로그인 페이지로 이동
+            if (window.confirm('회원가입이 완료되었습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                navigate('/auth');
+            }
+            
+        } catch (error) {
+            console.error('회원가입 에러:', error);
         }
     };
 
