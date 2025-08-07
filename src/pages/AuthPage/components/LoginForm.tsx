@@ -1,4 +1,5 @@
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/Button';
 import FormInput from '../../../components/FormInput';
 import { GoogleIcon, KakaoIcon, NaverIcon } from '../../../assets';
@@ -9,15 +10,57 @@ type LoginFormData = {
 };
 
 const LoginForm = () => {
+    const navigate = useNavigate();
     const { control, handleSubmit } = useForm<LoginFormData>({
         defaultValues: { email: '', password: '' },
         mode: 'onChange', // 실시간 validation
     });
 
     // 임시 onSubmit
-    const onSubmit = (data: LoginFormData) => {
+    const onSubmit = async (data: LoginFormData) => {
         console.log(data);
+
+        try {
+            const loginData: LoginRequest = {
+                userId: data.email,    // Controller에서 입력받은 이메일
+                userPw: data.password // Controller에서 입력받은 비밀번호
+            };
+
+            const response = await fetch('http://localhost:8080/api/lgn/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
+                body: JSON.stringify(loginData)
+            });
+
+            if (!response.ok) {
+                throw new Error('로그인 실패');
+            }
+
+            const result: LoginResponse = await response.json();
+            console.log('로그인 성공:', result);
+            
+            // 로그인 성공 시 대시보드 페이지로 이동
+            navigate('/dashboard');
+            
+        } catch (error) {
+            console.error('로그인 에러:', error);
+        }
     };
+
+    // types/auth.ts - 타입 정의
+    interface LoginRequest {
+        email: string;
+        password: string;
+    }
+
+    interface LoginResponse {
+        token: string;
+        userId: string;
+        email: string;
+    }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-center gap-8'>
@@ -64,7 +107,7 @@ const LoginForm = () => {
                 </div>
                 {/* actions */}
                 <div className='flex flex-col items-center gap-8'>
-                    <Button type='submit' className='w-[343px] h-[50px]'>이메일 로그인</Button>
+                    <Button type='submit' className='w-[343px] h-[50px]' >이메일 로그인</Button>
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         {/* 구분선 */}
                         <div className='flex w-[343px] items-center gap-3'>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -112,7 +112,9 @@ const DashboardPage = () => {
     });
 
     // 전체 템플릿 데이터
-    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>(DUMMY_TEMPLATES);
+    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>([]);
+    // 로딩 상태
+    const [isLoading, setIsLoading] = useState(false);
     // 현재 화면에 보여줄 개수
     const [visibleCount, setVisibleCount] = useState(8);
 
@@ -137,23 +139,58 @@ const DashboardPage = () => {
         }
     };
 
-    /*
-    // 템플릿 불러오기 (API)
+    // 템플릿 불러오기 (API) - POST 방식으로 변경
     useEffect(() => {
         const fetchTemplates = async () => {
+            setIsLoading(true);
             try {
-                const res = await axios.get("/api/templates", {
-                    params: { category: selectedCategory },
+                const response = await fetch("http://localhost:8080/temp/getUserTemplateDataList", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
+                    body: JSON.stringify({
+                        category: selectedCategory,
+                        page: 1
+                    })
                 });
-                setAllTemplates(res.data); // ✅ 예: [{ templateNo: 1, title: "...", ... }]
+
+                if (!response.ok) {
+                    throw new Error('템플릿 불러오기 실패');
+                }
+                
+                console.log("템플릿 데이터 response :", response);
+
+                const responseData = await response.json();
+                console.log("템플릿 데이터:", responseData);
+                
+                // responseData.templateDataList에서 실제 템플릿 배열 추출
+                const templates = responseData.templateDataList || [];
+                
+                // API 데이터를 기존 TemplateListItem 형식에 맞게 변환
+                const convertedTemplates = templates.map((template: any) => ({
+                    templateNo: template.templateNo,
+                    templateNm: template.templateNm,
+                    categoryNm: template.cateNm, // 카테고리 정보가 없으면 기본값 설정
+                    regDt: template.regDt,
+                    updDt: template.updDt || template.regDt,
+                    isBookmarked: template.isFavorite === "Y",
+                    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+                }));
+                
+                setAllTemplates(convertedTemplates);
             } catch (err) {
                 console.error("템플릿 불러오기 실패:", err);
+                // 에러 시 더미 데이터 사용
+                setAllTemplates(DUMMY_TEMPLATES);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchTemplates();
     }, [selectedCategory]);
-    */
 
     /*
     // 카테고리별 개수 불러오기 (API)
@@ -194,7 +231,11 @@ const DashboardPage = () => {
                 </div>
                 <section className="flex w-[1200px] flex-col items-center gap-[32px]">
                     <CategoryTabs counts={categoryCounts} selected={selectedCategory} onChange={handleCategoryChange} />
-                    {allTemplates.length === 0 ? (
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-20">
+                            <span className="text-[#707070] font-pretendard text-[16px]">템플릿을 불러오는 중...</span>
+                        </div>
+                    ) : allTemplates.length === 0 ? (
                         <EmptyState />
                     ) : (
                         <>
