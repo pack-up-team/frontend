@@ -153,6 +153,11 @@ const DashboardPage = () => {
         // useEffect에서 처리됨
     };
 
+    // 즐겨찾기 상태 변경 시 템플릿 목록 새로고침
+    const handleBookmarkToggle = () => {
+        fetchTemplatesWithSort();
+    };
+
     // 카테고리를 API 값으로 변환하는 함수
     const getCategoryValue = (category: string) => {
         switch (category) {
@@ -191,7 +196,6 @@ const DashboardPage = () => {
     const fetchTemplatesWithSort = useCallback(async (alignOption?: string) => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        console.log("token : "+token)
         const sortOption = alignOption || selectedAlign;
         
         try {
@@ -224,7 +228,6 @@ const DashboardPage = () => {
             }
             
             const responseData = await response.json();
-            console.log("템플릿 데이터:", responseData);
             
             const templates = responseData.templateDataList || [];
             const templateCntList: TemplateCntList = responseData.templateCntList;
@@ -311,7 +314,7 @@ const DashboardPage = () => {
                         <EmptyState />
                     ) : (
                         <>
-                            <TemplateGrid templates={visibleTemplates} />
+                            <TemplateGrid templates={visibleTemplates} onBookmarkToggle={handleBookmarkToggle} />
                             {visibleCount < allTemplates.length && (
                                 <Button onClick={() => setVisibleCount(prev => prev + 8)} className="w-[343px] h-[50px]" variant="line">더보기</Button>
                             )}

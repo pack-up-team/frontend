@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogoIcon } from '../../assets';
 import NotificationDropdown from './components/NotificationDropdown';
 import ProfileDropdown from './components/ProfileDropdown';
@@ -10,6 +10,7 @@ interface HeaderProps {
 }
 
 const Header = ({ pageType = 'default' }: HeaderProps) => {
+    const navigate = useNavigate();
     const isLandingPage = pageType === 'landing';
     const isDefaultPage = pageType === 'default';
 
@@ -88,8 +89,7 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
-                    },
-                    credentials: 'include' // 쿠키의 JWT 토큰 자동 포함
+                    }
                 });
 
                 if (!response.ok) {
@@ -112,10 +112,36 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
         }
     }, [isDefaultPage]);
     // onLogout: () => void;
-    const handleLogout = () => {
-        // TODO: 실제 로그아웃 처리 로직을 여기에 구현하세요
-        console.log("사용자 로그아웃 처리");
-        // 예시: authService.logout(); navigate('/');
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            
+            console.log("로그아웃 API 호출 시작");
+            
+            const response = await fetch('https://packupapi.xyz/api/lgn/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('로그아웃 실패');
+            }
+
+            console.log('로그아웃 성공');
+            
+            // 로컬 스토리지에서 토큰 제거
+            localStorage.removeItem('token');
+            
+            // 랜딩페이지로 이동 (루트 경로)
+            navigate('/');
+            
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+            alert('로그아웃에 실패했습니다. 다시 시도해주세요.');
+        }
     };
     // onMyPage: () => void;
     const handleMyPage = () => {

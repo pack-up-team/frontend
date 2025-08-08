@@ -3,9 +3,10 @@ import type { TemplateListItem } from "../../../stores/templateListStore";
 
 type TemplateGridProps = {
     templates: TemplateListItem[];
+    onBookmarkToggle?: () => void;
 };
 
-const TemplateGrid: React.FC<TemplateGridProps> = ({ templates }) => {
+const TemplateGrid: React.FC<TemplateGridProps> = ({ templates, onBookmarkToggle }) => {
     // 4개씩 맞추기 위한 placeholder 계산
     const placeholderCount = templates.length % 4 === 0 ? 0 : 4 - (templates.length % 4);
     const placeholders = Array(placeholderCount).fill(null); // null을 placeholder로 사용
@@ -23,7 +24,8 @@ const TemplateGrid: React.FC<TemplateGridProps> = ({ templates }) => {
                             onRename={() => {}}
                             onEdit={() => {}}
                             onDuplicate={() => {}}
-                            onDelete={() => {}} />
+                            onDelete={() => {}}
+                            onBookmarkToggle={onBookmarkToggle} />
                         ) : (
                             <div key={`placeholder-${rowIdx}-${idx}`} className="w-[276px] h-[374px] bg-transparent"></div>
                         )

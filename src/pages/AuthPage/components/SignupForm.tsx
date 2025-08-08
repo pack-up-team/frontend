@@ -48,8 +48,6 @@ const SignupForm = () => {
 
     // 임시 onSubmit
     const onSubmit = async (data: SignupFormData) => {
-        console.log(data);
-        console.log(agreements);
         if (!agreements.terms || !agreements.privacy) {
             alert('필수 항목에 동의해야 합니다.');
             return;
@@ -64,8 +62,6 @@ const SignupForm = () => {
                 personalInfoAcq: agreements.privacy,
                 mktAgree: agreements.marketing
             };
-
-            console.log("signupData : "+signupData);
 
             const response = await fetch('https://packupapi.xyz/register/userRegister', {
                 method: 'POST',

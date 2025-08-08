@@ -18,7 +18,6 @@ const LoginForm = () => {
 
     // 임시 onSubmit
     const onSubmit = async (data: LoginFormData) => {
-        console.log(data);
 
         try {
             const loginData: LoginRequest = {
@@ -31,7 +30,6 @@ const LoginForm = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // 쿠키의 JWT 토큰 자동 포함
                 body: JSON.stringify(loginData)
             });
 
