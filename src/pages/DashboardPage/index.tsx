@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -8,6 +8,25 @@ import TemplateGrid from "./components/TemplateGrid";
 import EmptyState from "./components/EmptyState";
 import Footer from "../../components/Footer";
 import type { TemplateListItem } from "../../stores/templateListStore";
+
+// API 응답 템플릿 타입 정의
+interface ApiTemplate {
+    templateNo: number;
+    templateNm: string;
+    cateNm: string;
+    regDt: string;
+    updDt?: string;
+    isFavorite: "Y" | "N";
+}
+
+// API 응답 카운트 타입 정의
+interface TemplateCntList {
+    totalCnt: number;
+    totalDailyCnt: number;
+    totalFavoriteCnt: number;
+    totalOfficeCnt: number;
+    totalTripCnt: number;
+}
 
 // 더미 데이터
 const DUMMY_TEMPLATES: TemplateListItem[] = [
@@ -100,77 +119,142 @@ const DUMMY_TEMPLATES: TemplateListItem[] = [
 const DashboardPage = () => {
     // 선택된 카테고리 상태
     const [selectedCategory, setSelectedCategory] = useState("전체");
+    // 정렬 상태
+    const [selectedAlign, setSelectedAlign] = useState("최근 수정일");
 
     // 카테고리별 개수 상태
-    // const [categoryCounts, setCategoryCounts]
-    const [categoryCounts] = useState({
-        전체: 10,
-        즐겨찾기: 4,
-        업무: 4,
-        생활: 4,
-        여행: 2,
+    const [categoryCounts, setCategoryCounts] = useState({
+        전체: 0,
+        즐겨찾기: 0,
+        업무: 0,
+        생활: 0,
+        여행: 0,
     });
 
     // 전체 템플릿 데이터
-    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>(DUMMY_TEMPLATES);
+    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>([]);
+    // 로딩 상태
+    const [isLoading, setIsLoading] = useState(false);
     // 현재 화면에 보여줄 개수
     const [visibleCount, setVisibleCount] = useState(8);
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
-        alert(option); // 정렬 기능은 이후 구현
+        setSelectedAlign(option);
     };
 
     // onChange: (category: string) => void;
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
         setVisibleCount(8);
+    };
 
-        // TODO: 나중에 백엔드 API 연결 시 여기를 API 호출로 대체
-        // 선택된 카테고리에 맞게 필터링
-        if (category === "전체") {
-            setAllTemplates(DUMMY_TEMPLATES);
-        } else if (category === "즐겨찾기") {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.isBookmarked));
-        } else {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.categoryNm === category));
+    // 카테고리를 API 값으로 변환하는 함수
+    const getCategoryValue = (category: string) => {
+        switch (category) {
+            case "전체":
+                return "";
+            case "즐겨찾기":
+                return "0";
+            case "업무":
+                return "1";
+            case "생활":
+                return "2";
+            case "여행":
+                return "3";
+            default:
+                return undefined;
         }
     };
 
-    /*
-    // 템플릿 불러오기 (API)
-    useEffect(() => {
-        const fetchTemplates = async () => {
+    // 정렬 기준을 API 값으로 변환하는 함수
+    const getAlignValue = (align: string) => {
+        switch (align) {
+            case "최근 수정일":
+                return 0;
+            case "최근 생성일":
+                return 1;
+            case "알림 시간 임박":
+                return 2;
+            case "템플릿명":
+                return 3;
+            default:
+                return 0;
+        }
+    };
+
+    // 템플릿 불러오기 함수
+    const fetchTemplates = useCallback(
+        async () => {
+            setIsLoading(true);
+            const token = localStorage.getItem('token');
+
             try {
-                const res = await axios.get("/api/templates", {
-                    params: { category: selectedCategory },
+                const categoryValue = getCategoryValue(selectedCategory);
+                const requestBody: {
+                    page: number;
+                    sort: number;
+                    cateNo?: string;
+                } = {
+                    page: 1,
+                    sort: getAlignValue(selectedAlign)
+                };
+                // 카테고리가 전체가 아닐 때만 cateNo 추가
+                if (categoryValue) {
+                    requestBody.cateNo = categoryValue;
+                }
+
+                const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
                 });
-                setAllTemplates(res.data); // ✅ 예: [{ templateNo: 1, title: "...", ... }]
+
+                if (!response.ok) {
+                    throw new Error('템플릿 불러오기 실패');
+                }
+
+                const responseData = await response.json();
+                const templates = responseData.templateDataList || [];
+                const templateCntList: TemplateCntList = responseData.templateCntList;
+
+                if (templateCntList) {
+                    setCategoryCounts({
+                        전체: templateCntList.totalCnt,
+                        즐겨찾기: templateCntList.totalFavoriteCnt,
+                        업무: templateCntList.totalOfficeCnt,
+                        생활: templateCntList.totalDailyCnt,
+                        여행: templateCntList.totalTripCnt,
+                    });
+                }
+                const convertedTemplates = templates.map((template: ApiTemplate) => ({
+                    templateNo: template.templateNo,
+                    templateNm: template.templateNm,
+                    categoryNm: template.cateNm,
+                    regDt: template.regDt,
+                    updDt: template.updDt || template.regDt,
+                    isBookmarked: template.isFavorite === "Y",
+                    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+                }));
+
+                setAllTemplates(convertedTemplates);
             } catch (err) {
-                console.error("템플릿 불러오기 실패:", err);
+                console.error("템플릿 불러오기 실패: ", err);
+                alert('템플릿을 불러오는 중 오류가 발생했습니다. 임시 데이터를 표시합니다.');
+                setAllTemplates(DUMMY_TEMPLATES);
+            } finally {
+                setIsLoading(false);
             }
-        };
+        },
+        [selectedCategory, selectedAlign]
+    );
 
-        fetchTemplates();
-    }, [selectedCategory]);
-    */
-
-    /*
-    // 카테고리별 개수 불러오기 (API)
     useEffect(() => {
-        const fetchCategoryCounts = async () => {
-            try {
-                const res = await axios.get("/api/dashboard/categories");
-                // 🔗 예시 응답: { 전체: 12, 즐겨찾기: 2, 업무: 5, 생활: 3, 여행: 1 }
-                setCategoryCounts(res.data);
-            } catch (err) {
-                console.error("카테고리 개수 불러오기 실패:", err);
-            }
-        };
-
-        fetchCategoryCounts();
-    }, []);
-    */
+        fetchTemplates();
+    }, [fetchTemplates]);
 
     // 현재 보여줄 템플릿 목록
     const visibleTemplates = allTemplates.slice(0, visibleCount);
@@ -189,12 +273,18 @@ const DashboardPage = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-[#141414] font-pretendard text-[16px] font-medium leading-normal">정렬</span>
-                        <AlignDropdown onAlignChange={handleAlignChange} />
+                        <AlignDropdown selectedAlign={selectedAlign} onAlignChange={handleAlignChange} />
                     </div>
                 </div>
                 <section className="flex w-[1200px] flex-col items-center gap-[32px]">
                     <CategoryTabs counts={categoryCounts} selected={selectedCategory} onChange={handleCategoryChange} />
-                    {allTemplates.length === 0 ? (
+                    {isLoading ? (
+                        <div className="pt-[50px] flex justify-center items-center">
+                            <p className="text-[#707070] text-center font-pretendard text-[16px] font-medium leading-[140%]">
+                                템플릿을 불러오는 중...
+                            </p>
+                        </div>
+                    ) : allTemplates.length === 0 ? (
                         <EmptyState />
                     ) : (
                         <>
