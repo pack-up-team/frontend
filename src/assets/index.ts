@@ -41,3 +41,8 @@ export { default as ViewKakaoIcon } from './view-kakao.svg?react';
 export { default as ViewLinkIcon } from './view-link.svg?react';
 export { default as ViewShareIcon } from './view-share.svg?react';
 export { default as ViewCheckboxIcon } from './view-checkbox.svg?react';
+export { default as ViewAlertOffIcon } from './view-alert-off.svg?react';
+export { default as ViewAlertOnIcon } from './view-alert-on.svg?react';
+export { default as ViewDeleteIcon } from './view-delete.svg?react';
+export { default as ViewExportIcon } from './view-export.svg?react';
+export { default as ViewBackIcon } from './view-back.svg?react';
