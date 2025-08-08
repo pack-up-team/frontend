@@ -29,6 +29,8 @@ const LoginForm = () => {
 
     // 일반 로그인 처리 (원본 코드 유지)
     const onSubmit = async (data: LoginFormData) => {
+        console.log(data);
+
         try {
             const loginData: LoginRequest = {
                 userId: data.email,

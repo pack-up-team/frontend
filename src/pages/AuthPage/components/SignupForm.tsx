@@ -63,6 +63,7 @@ const SignupForm = () => {
                 mktAgree: agreements.marketing
             };
 
+            console.log("signupData : "+signupData);
 
             const response = await fetch('https://packupapi.xyz/register/userRegister', {
                 method: 'POST',
