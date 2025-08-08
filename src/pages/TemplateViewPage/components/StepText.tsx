@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ViewArrowUpIcon, ViewArrowDownIcon } from "../../../assets";
 
 type StepTextProps = {
@@ -12,9 +12,26 @@ const textStyle = "w-[71px] flex-[1_0_0] text-white font-inter text-sm font-semi
 
 const StepText = ({ text }: StepTextProps) => {
     const [open, setOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target as Node)
+            ) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
-        <div className={open ? boxOpenStyle : boxCloseStyle}>
+        <div ref={containerRef} className={open ? boxOpenStyle : boxCloseStyle}>
             <p className={`${textStyle} ${open ? "line-clamp-7" : "line-clamp-2"}`}>{text}</p>
             <button onClick={() => setOpen((prev) => !prev)} className="cursor-pointer">
                 {open ? <ViewArrowUpIcon className="w-3 h-3" /> : <ViewArrowDownIcon className="w-3 h-3" />}
