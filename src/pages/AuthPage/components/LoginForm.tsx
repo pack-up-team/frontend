@@ -27,6 +27,7 @@ const LoginForm = () => {
         mode: 'onChange', // 실시간 validation
     });
 
+    // 일반 로그인 처리 (원본 코드 유지)
     const onSubmit = async (data: LoginFormData) => {
         try {
             const loginData: LoginRequest = {
@@ -54,6 +55,28 @@ const LoginForm = () => {
         } catch (error) {
             console.error('로그인 실패: ', error);
             alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+        }
+    };
+
+    // SNS 로그인 처리 (새로 추가된 부분)
+    const handleSnsLogin = (provider: 'google' | 'kakao' | 'naver') => {
+        try {
+            // 사용자에게 SNS 선택 확인
+            const confirmed = confirm(
+                `${provider.toUpperCase()} 계정으로 로그인하시겠습니까?\n\n` +
+                `⚠️ 주의사항:\n` +
+                `• 한 번 선택한 SNS는 변경할 수 없습니다\n` +
+                `• 다른 SNS와 중복 가입이 불가능합니다\n` +
+                `• 이미 다른 SNS로 가입된 경우 로그인이 차단됩니다`
+            );
+            
+            if (confirmed) {
+                console.log(`${provider.toUpperCase()} 로그인 시작`);
+                window.location.href = `https://packupapi.xyz/oauth2/authorization/${provider}`;
+            }
+        } catch (error) {
+            console.error(`${provider} 로그인 오류:`, error);
+            alert('SNS 로그인 중 오류가 발생했습니다.');
         }
     };
 
@@ -120,18 +143,33 @@ const LoginForm = () => {
                                 </svg>
                             </div>
                         </div>
-                        {/* buttons */}
+                        {/* SNS 로그인 버튼들 (새로 추가된 부분) */}
                         <div className='flex flex-col items-center gap-4'>
                             <div className='flex flex-col items-start gap-4'>
-                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                <Button 
+                                    variant='line' 
+                                    className='w-[343px] h-[50px]'
+                                    type='button'
+                                    onClick={() => handleSnsLogin('google')}
+                                >
                                     <GoogleIcon className='w-[18px] h-[18px]' />
                                     Google 로그인
                                 </Button>
-                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                <Button 
+                                    variant='line' 
+                                    className='w-[343px] h-[50px]'
+                                    type='button'
+                                    onClick={() => handleSnsLogin('kakao')}
+                                >
                                     <KakaoIcon className='w-[18px] h-[18px]' />
                                     카카오 로그인
                                 </Button>
-                                <Button variant='line' className='w-[343px] h-[50px]'>
+                                <Button 
+                                    variant='line' 
+                                    className='w-[343px] h-[50px]'
+                                    type='button'
+                                    onClick={() => handleSnsLogin('naver')}
+                                >
                                     <NaverIcon className='w-[18px] h-[18px]' />
                                     네이버 로그인
                                 </Button>
