@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import LoginForm from './components/LoginForm';
@@ -13,7 +13,19 @@ const tabStyles = {
 
 const AuthPage = () => {
     const [params, setParams] = useSearchParams();
+    const navigate = useNavigate();
     const mode = (params.get("mode") as "login" | "signup") || "login";
+    
+    // SNS 로그인 후 처리
+    useEffect(() => {
+        const userInfo = params.get('userInfo');
+        const error = params.get('error');
+        
+        if (userInfo || error) {
+            // SNS 콜백 페이지로 리다이렉트
+            navigate('/auth/sns-callback?' + params.toString());
+        }
+    }, [params, navigate]);
     
     const switchMode = useCallback(
         (nextMode: "login" | "signup") => {
@@ -30,8 +42,18 @@ const AuthPage = () => {
                     <div className="flex flex-col items-center gap-10 self-stretch">
                         {/* 로그인/회원가입 탭 전환 */}
                         <div className="flex w-[400px] items-center">
-                            <button onClick={() => switchMode("login")} className={mode === "login" ? tabStyles.active : tabStyles.inactive}>로그인</button>
-                            <button onClick={() => switchMode("signup")} className={mode === "signup" ? tabStyles.active : tabStyles.inactive}>회원가입</button>
+                            <button 
+                                onClick={() => switchMode("login")} 
+                                className={mode === "login" ? tabStyles.active : tabStyles.inactive}
+                            >
+                                로그인
+                            </button>
+                            <button 
+                                onClick={() => switchMode("signup")} 
+                                className={mode === "signup" ? tabStyles.active : tabStyles.inactive}
+                            >
+                                회원가입
+                            </button>
                         </div>
                         {/* 폼 전환 */}
                         {mode === 'login' ? <LoginForm /> : <SignupForm />}
