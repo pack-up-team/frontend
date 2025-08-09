@@ -135,27 +135,39 @@ const DashboardPage = () => {
     const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>([]);
     // 로딩 상태
     const [isLoading, setIsLoading] = useState(false);
-    // 현재 화면에 보여줄 개수
-    const [visibleCount, setVisibleCount] = useState(8);
+    // 더보기 로딩 상태
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    // 현재 페이지
+    const [currentPage, setCurrentPage] = useState(1);
+    // 더 가져올 데이터가 있는지 여부
+    const [hasMore, setHasMore] = useState(true);
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
         setSelectedAlign(option);
-        // API에 정렬 기준 전달하기 위해 다시 데이터를 불러옴
-        fetchTemplatesWithSort(option);
+        // 정렬 변경 시 처음부터 다시 로드
+        setCurrentPage(1);
+        setAllTemplates([]);
+        setHasMore(true);
+        fetchTemplatesWithSort(option, 1, true);
     };
 
     // onChange: (category: string) => void;
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
-        setVisibleCount(8);
-        // 카테고리 변경 시 현재 정렬 기준으로 다시 데이터 불러오기
+        // 카테고리 변경 시 처음부터 다시 로드
+        setCurrentPage(1);
+        setAllTemplates([]);
+        setHasMore(true);
         // useEffect에서 처리됨
     };
 
     // 즐겨찾기 상태 변경 시 템플릿 목록 새로고침
     const handleBookmarkToggle = () => {
-        fetchTemplatesWithSort();
+        setCurrentPage(1);
+        setAllTemplates([]);
+        setHasMore(true);
+        fetchTemplatesWithSort(undefined, 1, true);
     };
 
     // 카테고리를 API 값으로 변환하는 함수
@@ -193,10 +205,16 @@ const DashboardPage = () => {
     };
 
     // 템플릿 불러오기 함수
-    const fetchTemplatesWithSort = useCallback(async (alignOption?: string) => {
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
+    const fetchTemplatesWithSort = useCallback(async (alignOption?: string, page?: number, isReset?: boolean) => {
+        const targetPage = page || currentPage;
         const sortOption = alignOption || selectedAlign;
+        const token = localStorage.getItem('token');
+        
+        if (isReset) {
+            setIsLoading(true);
+        } else {
+            setIsLoadingMore(true);
+        }
         
         try {
             const categoryValue = getCategoryValue(selectedCategory);
@@ -205,7 +223,7 @@ const DashboardPage = () => {
                 sort: number;
                 cateNo?: string;
             } = {
-                page: 1,
+                page: targetPage,
                 sort: getAlignValue(sortOption)
             };
             
@@ -213,6 +231,8 @@ const DashboardPage = () => {
             if (categoryValue) {
                 requestBody.cateNo = categoryValue;
             }
+
+            console.log('API 요청:', requestBody);
 
             const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
                 method: 'POST',
@@ -228,12 +248,13 @@ const DashboardPage = () => {
             }
             
             const responseData = await response.json();
+            console.log('API 응답:', responseData);
             
             const templates = responseData.templateDataList || [];
             const templateCntList: TemplateCntList = responseData.templateCntList;
             
-            // 카테고리 개수 업데이트
-            if (templateCntList) {
+            // 카테고리 개수 업데이트 (첫 페이지일 때만)
+            if (targetPage === 1 && templateCntList) {
                 setCategoryCounts({
                     전체: templateCntList.totalCnt,
                     즐겨찾기: templateCntList.totalFavoriteCnt,
@@ -253,19 +274,43 @@ const DashboardPage = () => {
                 thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
             }));
             
-            setAllTemplates(convertedTemplates);
+            // 첫 페이지이거나 리셋인 경우 새로 설정, 아니면 기존 데이터에 추가
+            if (isReset || targetPage === 1) {
+                setAllTemplates(convertedTemplates);
+            } else {
+                setAllTemplates(prev => [...prev, ...convertedTemplates]);
+            }
+            
+            // 더 가져올 데이터가 있는지 확인 (가져온 데이터가 8개 미만이면 마지막 페이지)
+            setHasMore(templates.length >= 8);
+            setCurrentPage(targetPage);
+            
         } catch (err) {
             console.error("템플릿 불러오기 실패:", err);
-            setAllTemplates(DUMMY_TEMPLATES);
+            if (isReset || targetPage === 1) {
+                setAllTemplates(DUMMY_TEMPLATES);
+            }
         } finally {
             setIsLoading(false);
+            setIsLoadingMore(false);
         }
-    }, [selectedCategory, selectedAlign]);
+    }, [selectedCategory, selectedAlign, currentPage]);
 
     // 템플릿 불러오기 (API) - POST 방식으로 변경
     useEffect(() => {
-        fetchTemplatesWithSort();
-    }, [fetchTemplatesWithSort]);
+        setCurrentPage(1);
+        setAllTemplates([]);
+        setHasMore(true);
+        fetchTemplatesWithSort(undefined, 1, true);
+    }, [selectedCategory, selectedAlign]);
+
+    // 더보기 버튼 클릭 시 다음 페이지 로드
+    const handleLoadMore = () => {
+        if (!isLoadingMore && hasMore) {
+            const nextPage = currentPage + 1;
+            fetchTemplatesWithSort(undefined, nextPage, false);
+        }
+    };
 
     /*
     // 카테고리별 개수 불러오기 (API)
@@ -284,8 +329,8 @@ const DashboardPage = () => {
     }, []);
     */
 
-    // 현재 보여줄 템플릿 목록
-    const visibleTemplates = allTemplates.slice(0, visibleCount);
+    // 모든 템플릿을 표시 (페이지네이션으로 관리)
+    const visibleTemplates = allTemplates;
 
     return (
         <div className='flex w-full flex-col items-start gap-[8px] bg-[#FAFAFA] min-h-screen'>
@@ -315,8 +360,15 @@ const DashboardPage = () => {
                     ) : (
                         <>
                             <TemplateGrid templates={visibleTemplates} onBookmarkToggle={handleBookmarkToggle} />
-                            {visibleCount < allTemplates.length && (
-                                <Button onClick={() => setVisibleCount(prev => prev + 8)} className="w-[343px] h-[50px]" variant="line">더보기</Button>
+                            {hasMore && (
+                                <Button 
+                                    onClick={handleLoadMore} 
+                                    disabled={isLoadingMore}
+                                    className="w-[343px] h-[50px]" 
+                                    variant="line"
+                                >
+                                    {isLoadingMore ? '불러오는 중...' : '더보기'}
+                                </Button>
                             )}
                         </>
                     )}
