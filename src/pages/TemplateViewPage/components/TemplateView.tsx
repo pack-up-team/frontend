@@ -52,6 +52,13 @@ const resolveGlobalCell = (totalSteps: number, stepNo: number, locNum: number) =
     return toGlobalCell(ox, oy, sxClamped, syClamped);
 };
 
+// 임시 오브젝트
+const cells = [
+    { totalSteps: 4, stepNo: 3, locNum: 5 },
+    { totalSteps: 4, stepNo: 1, locNum: 1 },
+    { totalSteps: 4, stepNo: 2, locNum: 3 }
+];
+
 const TemplateView = () => {
     // const { templateData } = useTemplateDetailStore();
     // const backgroundImage = `/cate-${templateData?.templateCateNo}-step-${templateData?.stepsList.length}.svg`;
@@ -62,6 +69,24 @@ const TemplateView = () => {
     return (
         <div className="relative mx-auto w-[800px] h-[800px] bg-white">
             <img draggable={false} className="absolute w-[800px] h-[800px] left-0 top-0" src={backgroundImage} />
+            {cells.map((cell, i) => {
+                const { gx, gy } = resolveGlobalCell(cell.totalSteps, cell.stepNo, cell.locNum);
+                return (
+                    <img
+                        key={i}
+                        src="https://packupapi.xyz/images/office/Backpack.png"
+                        draggable={false} // 드래그 미리보기 방지
+                        className="absolute"
+                        style={{
+                            left: `${gx}px`,
+                            top: `${gy}px`,
+                            zIndex: 40-i,
+                            width: "83px",
+                            height: "83px",
+                        }}
+                    />
+                );
+            })}
         </div>
     );
 };
