@@ -16,6 +16,7 @@ type NotificationDropdownProps = {
     notifications: Notification[];
     onMarkAllRead: () => void;
     onClickNotification: (id: number) => void;
+    unreadCount: number;
 };
 
 // 조사 자동 설정 함수
@@ -43,10 +44,10 @@ const MESSAGES = {
     }
 };
 
-const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications, onMarkAllRead, onClickNotification }) => {
+const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications, onMarkAllRead, onClickNotification, unreadCount }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const count = notifications.filter(n => !n.read).length;
+    const count = unreadCount;
 
     const toggleDropdown = () => setIsOpen((prev) => !prev);
     const closeDropdown = () => setIsOpen(false);

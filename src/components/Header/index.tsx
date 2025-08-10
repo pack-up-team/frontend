@@ -14,60 +14,30 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     const isLandingPage = pageType === 'landing';
     const isDefaultPage = pageType === 'default';
 
-    // notifications: Notification[];
-    const dummyNotifications: Notification[] = [
-        {
-            id: 1,
-            title: "회의 준비",
-            memo: "10분 후 회의 시작",
-            timeAgo: "방금 전",
-            timestamp: new Date().toISOString(),
-            dateGroup: "오늘",    // ✅ 리터럴 타입
-            read: false,
-        },
-        {
-            id: 2,
-            title: "새 댓글",
-            memo: "게시물에 댓글이 달렸습니다.",
-            timeAgo: "5분 전",
-            timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-            dateGroup: "오늘",    // ✅ 리터럴 타입
-            read: true,
-        },
-        {
-            id: 3,
-            title: "비밀번호 변경",
-            memo: "계정 보안 강화",
-            timeAgo: "1일 전",
-            timestamp: new Date(Date.now() - 24 * 3600000).toISOString(),
-            dateGroup: "어제",    // ✅ 리터럴 타입
-            read: false,
-        },
-        {
-            id: 4,
-            title: "주간 리포트 확인",
-            memo: "이번 주 성과를 확인하세요.",
-            timeAgo: "3일 전",
-            timestamp: new Date(Date.now() - 3 * 24 * 3600000).toISOString(),
-            dateGroup: "이번 주",
-            read: false,
-        },
-        {
-            id: 5,
-            title: "새 프로젝트 시작",
-            memo: "지난 주에 새 프로젝트가 생성되었습니다.",
-            timeAgo: "6일 전",
-            timestamp: new Date(Date.now() - 6 * 24 * 3600000).toISOString(),
-            dateGroup: "지난 주",
-            read: true,
-        },
-    ];
-    // onMarkAllRead: () => void;
-    const handleMarkAllRead = () => {
-        // TODO: 모든 알림을 읽음 처리하는 기능을 여기에 구현하세요
-        console.log("모든 알림을 읽음 처리합니다.");
-        // 예시: notificationService.markAllAsRead();
+    // 모든 알림 읽음 처리
+    const handleMarkAllRead = async  () => {
+        if (!userId) return;
+
+        try {
+            const res = await fetch('https://packupapi.xyz/notifications/readAll', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userId }),
+            });
+
+            if (!res.ok) throw new Error('모두 읽음 처리 실패');
+
+            setUnreadCount(0);
+
+            // 1) 목록의 모든 항목을 read=true로
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true})));
+
+        } catch (err) {
+            console.error('모두 읽음 처리 에러:', err);
+        }
     };
+
     // onClickNotification: (id: number) => void;
     const handleClickNotification = (id: number) => {
         // TODO: 알림 클릭 시 상세 페이지 이동 또는 상태 업데이트 로직을 구현하세요
@@ -76,6 +46,7 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     };
 
     const [username, setUsername] = useState<string>("심심한알파카59223");
+    const [userId, setUserId] = useState<string>("");
     // 사용자 정보 불러오기(JWT 토큰으로 인증)
     useEffect(() => {
         if (!isDefaultPage) return;
@@ -103,10 +74,12 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     
                 // 다양한 키 중 첫 번째 존재하는 것 사용
                 setUsername(userInfo.username || userInfo.userName || userInfo.userId || userInfo.email || "심심한알파카59223");
+                setUserId(userInfo.userId);
             } catch (err) {
                 if (err instanceof Error && err.name === 'AbortError') return;
                 console.error("사용자 정보 불러오기 실패: ", err);
                 setUsername("심심한알파카59223");
+                setUserId("");
             }
         };
 
@@ -116,6 +89,165 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
             abortController.abort();
         };
     }, [isDefaultPage]);
+
+    // 자료형 선언
+    interface NotificationPayload {
+        templateNo: number;
+        templateNm: string;
+        message: string;
+        sentAt: string;
+        readYn: boolean;
+        thumbnail: string;
+    }
+
+    // 실시간 알림 SSE 구독요청
+    useEffect(() => {
+        if (!userId) return;
+
+        const url = `https://packupapi.xyz/notifications/subscribe?userId=${encodeURIComponent(userId)}`;
+
+        const es = new EventSource(url);
+
+        // 연결 이벤트 (브라우저 레벨)
+        es.onopen = () => console.log('[SSE] onopen');
+        es.onerror = (e) => console.warn('[SSE] onerror', e);
+
+        // 서버에서 보낸 커스텀 이벤트들
+        es.addEventListener('connect', (e: MessageEvent) => {
+            console.log('[SSE] event:connect =>', e.data);
+        });
+
+        // 실제 알림
+        const handlePayload = (e: MessageEvent) => {
+            let it: NotificationPayload;
+            try { it = JSON.parse(e.data); } catch { it = e.data; }
+
+            const n: Notification = {
+                id: it.templateNo,
+                title: it.templateNm,
+                memo: it.message,
+                timestamp: it.sentAt,
+                timeAgo: getTimeAgo(it.sentAt),
+                dateGroup: getDateGroup(it.sentAt),
+                read: Boolean(it.readYn),
+                thumbnail: it.thumbnail ?? undefined,
+            };
+
+            setNotifications(prev => {
+                const exists = prev.some(p => p.id === n.id);
+                const next = exists ? prev.map(p => (p.id === n.id ? n : p)) : [n, ...prev];
+                next.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                return next;
+            });
+            if (!n.read) setUnreadCount(c => c + 1);
+        };
+
+        es.addEventListener('alarm', handlePayload);
+
+        return () => {
+            console.log('[SSE] closed');
+            es.close();
+        };
+    }, [userId]);
+
+    // 안읽은 알림 갯수 조회
+    const [unreadCount, setUnreadCount] = useState<number>(0);
+    useEffect(() => {
+        if (!userId) return; // userId 없으면 실행 안 함
+
+        const controller = new AbortController();
+
+        const fetchUnreadCount  = async () => {
+            try {
+                const response = await fetch(
+                    `https://packupapi.xyz/notifications/unread_count?userId=${encodeURIComponent(userId)}`,
+                    {
+                    method: 'GET',
+                    credentials: 'include',
+                    signal: controller.signal,
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('안 읽은 알림 개수 불러오기 실패');
+                }
+
+                const data = await response.json(); // { count: number }
+                setUnreadCount(Number(data.count ?? 0));
+            } catch (err) {
+                if (err instanceof Error && err.name === 'AbortError') return;
+                console.error('안 읽은 알림 개수 조회 실패:', err);
+                setUnreadCount(0);
+            }
+        };
+
+        fetchUnreadCount ();
+    }, [userId]);
+
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    const getTimeAgo = (iso: string) => {
+        const t = new Date(iso).getTime(), d = Date.now() - t;
+        const s = Math.floor(d/1000); if (s < 60) return '방금 전';
+        const m = Math.floor(s/60); if (m < 60) return `${m}분 전`;
+        const h = Math.floor(m/60); if (h < 24) return `${h}시간 전`;
+        const day = Math.floor(h/24); return `${day}일 전`;
+    };
+
+    const getDateGroup = (iso: string): Notification['dateGroup'] => {
+        const d = new Date(iso), now = new Date();
+        const start = (x:Date)=> new Date(x.getFullYear(), x.getMonth(), x.getDate());
+        const one = 86400000;
+        const today = +start(now), target = +start(d);
+        if (target === today) return '오늘';
+        if (target === today - one) return '어제';
+        const dayIdx = (n:Date)=>(n.getDay()+6)%7; // 월=0
+        const sow = (()=>{ const s=start(now); s.setDate(s.getDate()-dayIdx(now)); return +s; })();
+        if (target >= sow) return '이번 주';
+        if (target >= sow - 7*one) return '지난 주';
+        return '지난 주';
+    };
+
+    // 알림 목록 조회
+    useEffect(() => {
+        if (!userId) return;
+        const controller = new AbortController();
+
+        (async () => {
+            try {
+                const res = await fetch(
+                    `https://packupapi.xyz/notifications/list?userId=${encodeURIComponent(userId)}`,
+                    { method: 'GET', credentials: 'include', signal: controller.signal }
+                );
+                if (!res.ok) throw new Error('알림 목록 불러오기 실패');
+
+                // 서버 응답 예시 가정: [{ id, title, memo, timestamp, read, thumbnail }]
+                const raw: NotificationPayload[] = await res.json();
+
+                const mapped: Notification[] = raw.map((it) => ({
+                    id: Number(it.templateNo),
+                    title: String(it.templateNm ?? ''),
+                    memo: it.message ?? '',
+                    timestamp: it.sentAt, // 정렬용
+                    timeAgo: getTimeAgo(it.sentAt),
+                    dateGroup: getDateGroup(it.sentAt),
+                    read: Boolean(it.readYn),
+                    thumbnail: it.thumbnail ?? undefined,
+                }));
+
+                // 최신순 정렬
+                mapped.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+                setNotifications(mapped);
+            } catch (err) {
+                if (err instanceof Error && err.name === 'AbortError') return;
+                console.error('알림 목록 조회 실패:', err);
+                setNotifications([]);
+            }
+        })();
+
+        return () => controller.abort();
+    }, [userId]);
 
     // onLogout: () => void;
     const handleLogout = async () => {
@@ -167,7 +299,7 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
                 {/* default */}
                 {isDefaultPage && (
                     <div className='flex items-center gap-2'>
-                        <NotificationDropdown notifications={dummyNotifications} onMarkAllRead={handleMarkAllRead} onClickNotification={handleClickNotification} />
+                        <NotificationDropdown notifications={notifications} onMarkAllRead={handleMarkAllRead} onClickNotification={handleClickNotification} unreadCount={unreadCount} />
                         <ProfileDropdown username={username} onLogout={handleLogout} onMyPage={handleMyPage} />
                     </div>
                 )}
