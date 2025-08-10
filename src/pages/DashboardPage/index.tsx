@@ -292,7 +292,7 @@ const DashboardPage = () => {
         setAllTemplates([]);
         setHasMore(true);
         fetchTemplates(undefined, 1, true);
-    }, [selectedCategory, selectedAlign]);
+    }, [selectedCategory, selectedAlign, fetchTemplates]);
 
     // 더보기 버튼 클릭 시 다음 페이지 로드
     const handleLoadMore = () => {
