@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogoIcon } from '../../assets';
 import NotificationDropdown from './components/NotificationDropdown';
 import ProfileDropdown from './components/ProfileDropdown';
@@ -10,6 +10,7 @@ interface HeaderProps {
 }
 
 const Header = ({ pageType = 'default' }: HeaderProps) => {
+    const navigate = useNavigate();
     const isLandingPage = pageType === 'landing';
     const isDefaultPage = pageType === 'default';
 
@@ -91,7 +92,6 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include', // 브라우저가 JWT 토큰 쿠키 자동 전송
                     signal: abortController.signal
                 });
 
@@ -118,10 +118,25 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
     }, [isDefaultPage]);
 
     // onLogout: () => void;
-    const handleLogout = () => {
-        // TODO: 실제 로그아웃 처리 로직을 여기에 구현하세요
-        console.log("사용자 로그아웃 처리");
-        // 예시: authService.logout(); navigate('/');
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('https://packupapi.xyz/api/lgn/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) console.warn('서버 로그아웃 실패');
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+        } finally {
+            localStorage.removeItem('token');
+            navigate('/');
+        }
     };
     // onMyPage: () => void;
     const handleMyPage = () => {

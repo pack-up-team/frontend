@@ -39,7 +39,6 @@ const LoginForm = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // JWT 쿠키 자동 전송
                 body: JSON.stringify(loginData)
             });
     

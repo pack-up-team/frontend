@@ -9,6 +9,7 @@ type TemplateCardSmallProps = {
     onEdit: (templateNo: number) => void;
     onDuplicate: (templateNo: number) => void;
     onDelete: (templateNo: number) => void;
+    onBookmarkToggle?: () => void;
 };
 
 const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
@@ -17,6 +18,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
     onEdit,
     onDuplicate,
     onDelete,
+    onBookmarkToggle,
 }) => {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [bookmarked, setBookmarked] = useState(template.isBookmarked ?? false);
@@ -31,12 +33,45 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
         if (isBookmarkLoading) return;
 
         setIsBookmarkLoading(true);
-        setBookmarked((prev) => !prev); // 낙관적 UI 업데이트
+        const newBookmarkState = !bookmarked;
+        setBookmarked(newBookmarkState); // 낙관적 UI 업데이트
+
+        const requestData = {
+            templateNo: template.templateNo,
+            isFavorite: newBookmarkState ? 'Y' : 'N'
+        };
 
         try {
-            // TODO: API 연결 시 아래 코드에 적용
-            console.log(`템플릿 ${template.templateNo} 북마크 상태 변경 요청`);
-            // await bookmarksService.toggle(template.templateNo);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setBookmarked((prev) => !prev);
+                setIsBookmarkLoading(false);
+                alert('로그인이 필요합니다.');
+                return;
+            }
+            const response = await fetch('https://packupapi.xyz/temp/templateStatusUpdate', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.status === 401) {
+                setBookmarked((prev) => !prev);
+                localStorage.removeItem('token');
+                alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                return;
+            }
+            if (!response.ok) {
+                throw new Error('즐겨찾기 상태 변경 실패');
+            }
+
+            // 상위 컴포넌트에 변경 사항 알림 (템플릿 목록 새로고침용)
+            if (onBookmarkToggle) {
+                onBookmarkToggle();
+            }
         } catch (error) {
             // 실패 시 원래대로 복구
             setBookmarked((prev) => !prev);
@@ -47,7 +82,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
     };
 
     // 템플릿 이름 저장
-    const handleSaveName = () => {
+    const handleSaveName = async () => {
         const trimmedName = editedName.trim(); // 앞뒤 공백 제거
 
         if (!trimmedName) {
@@ -57,9 +92,92 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             return;
         }
 
-        onRename(template.templateNo, trimmedName); // 정상 저장
-        // TODO: 백엔드 API 호출해서 템플릿 이름 업데이트
+        if (trimmedName === template.templateNm) {
+            // 변경사항이 없으면 그냥 편집 종료
+            setIsEditing(false);
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const requestData = {
+                templateNo: template.templateNo,
+                templateNm: trimmedName
+            };
+
+            console.log("템플릿명 변경 API 요청 데이터:", requestData);
+
+            const response = await fetch('https://packupapi.xyz/temp/templateStatusUpdate', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error('템플릿명 변경 실패');
+            }
+
+            console.log(`템플릿 ${template.templateNo} 이름이 "${trimmedName}"으로 변경되었습니다.`);
+
+            onRename(template.templateNo, trimmedName); // 상위 컴포넌트에 알림
+
+            // 템플릿 목록 새로고침을 위해 onBookmarkToggle 재사용
+            if (onBookmarkToggle) {
+                onBookmarkToggle();
+            }
+        } catch (error) {
+            console.error('템플릿명 변경 실패:', error);
+            // 실패 시 원래 이름으로 복구
+            setEditedName(template.templateNm);
+        }
+
         setIsEditing(false);
+    };
+
+    // 템플릿 삭제
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm(`"${template.templateNm}" 템플릿을 삭제하시겠습니까?\n\n삭제된 템플릿은 복구할 수 없습니다.`);
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const requestData = {
+                templateNo: template.templateNo
+            };
+
+            console.log("템플릿 삭제 API 요청 데이터:", requestData);
+
+            const response = await fetch('https://packupapi.xyz/temp/templateDelete', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error('템플릿 삭제 실패');
+            }
+
+            console.log(`템플릿 ${template.templateNo} "${template.templateNm}"이 삭제되었습니다.`);
+
+            onDelete(template.templateNo); // 상위 컴포넌트에 알림
+
+            // 템플릿 목록 새로고침을 위해 onBookmarkToggle 재사용
+            if (onBookmarkToggle) {
+                onBookmarkToggle();
+            }
+        } catch (error) {
+            console.error('템플릿 삭제 실패:', error);
+            alert('템플릿 삭제에 실패했습니다. 다시 시도해주세요.');
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -101,7 +219,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
                                 onRename={() => { setIsEditing(true); setDropdownOpen(false); }}
                                 onEdit={() => onEdit(template.templateNo)}
                                 onDuplicate={() => onDuplicate(template.templateNo)}
-                                onDelete={() => onDelete(template.templateNo)}
+                                onDelete={() => { setDropdownOpen(false); handleDelete(); }}
                             />
                         </div>
                     )}
