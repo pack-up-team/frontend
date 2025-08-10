@@ -149,6 +149,11 @@ const DashboardPage = () => {
         setVisibleCount(8);
     };
 
+    // 즐겨찾기 상태 변경 시 템플릿 목록 새로고침
+    const handleBookmarkToggle = () => {
+        fetchTemplates();
+    };
+
     // 카테고리를 API 값으로 변환하는 함수
     const getCategoryValue = (category: string) => {
         switch (category) {
@@ -288,7 +293,7 @@ const DashboardPage = () => {
                         <EmptyState />
                     ) : (
                         <>
-                            <TemplateGrid templates={visibleTemplates} />
+                            <TemplateGrid templates={visibleTemplates} onBookmarkToggle={handleBookmarkToggle} />
                             {visibleCount < allTemplates.length && (
                                 <Button onClick={() => setVisibleCount(prev => prev + 8)} className="w-[343px] h-[50px]" variant="line">더보기</Button>
                             )}
