@@ -27,9 +27,56 @@ const LoginForm = () => {
         mode: 'onChange', // 실시간 validation
     });
 
-    // 임시 onSubmit
-    const onSubmit = (data: LoginFormData) => {
-        console.log(data);
+    // 일반 로그인 처리 (원본 코드 유지)
+    const onSubmit = async (data: LoginFormData) => {
+        try {
+            const loginData: LoginRequest = {
+                userId: data.email,
+                userPw: data.password
+            };
+    
+            const response = await fetch('https://packupapi.xyz/api/lgn/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData)
+            });
+    
+            if (!response.ok) {
+                throw new Error('로그인 실패');
+            }
+
+            const result: LoginResponse = await response.json();
+            localStorage.setItem('token', result.token);
+
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('로그인 실패: ', error);
+            alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+        }
+    };
+
+    // SNS 로그인 처리 (새로 추가된 부분)
+    const handleSnsLogin = (provider: 'google' | 'kakao' | 'naver') => {
+        try {
+            // 사용자에게 SNS 선택 확인
+            const confirmed = confirm(
+                `${provider.toUpperCase()} 계정으로 로그인하시겠습니까?\n\n` +
+                `⚠️ 주의사항:\n` +
+                `• 한 번 선택한 SNS는 변경할 수 없습니다\n` +
+                `• 다른 SNS와 중복 가입이 불가능합니다\n` +
+                `• 이미 다른 SNS로 가입된 경우 로그인이 차단됩니다`
+            );
+            
+            if (confirmed) {
+                console.log(`${provider.toUpperCase()} 로그인 시작`);
+                window.location.href = `https://packupapi.xyz/oauth2/authorization/${provider}`;
+            }
+        } catch (error) {
+            console.error(`${provider} 로그인 오류:`, error);
+            alert('SNS 로그인 중 오류가 발생했습니다.');
+        }
     };
 
     return (
@@ -77,7 +124,7 @@ const LoginForm = () => {
                 </div>
                 {/* actions */}
                 <div className='flex flex-col items-center gap-8'>
-                    <Button type='submit' className='w-[343px] h-[50px]' >이메일 로그인</Button>
+                    <Button type='submit' className='w-[343px] h-[50px]'>이메일 로그인</Button>
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         {/* 구분선 */}
                         <div className='flex w-[343px] items-center gap-3'>

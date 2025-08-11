@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+// import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -8,6 +9,27 @@ import TemplateGrid from "./components/TemplateGrid";
 import EmptyState from "./components/EmptyState";
 import Footer from "../../components/Footer";
 import type { TemplateListItem } from "../../stores/templateListStore";
+import AddTemplateTypeModal from "./components/AddTemplateTypeModal";
+import PresetSetModal from "./components/PresetSetModal";
+
+// API 응답 템플릿 타입 정의
+interface ApiTemplate {
+    templateNo: number;
+    templateNm: string;
+    cateNm: string;
+    regDt: string;
+    updDt?: string;
+    isFavorite: "Y" | "N";
+}
+
+// API 응답 카운트 타입 정의
+interface TemplateCntList {
+    totalCnt: number;
+    totalDailyCnt: number;
+    totalFavoriteCnt: number;
+    totalOfficeCnt: number;
+    totalTripCnt: number;
+}
 
 // 더미 데이터
 const DUMMY_TEMPLATES: TemplateListItem[] = [
@@ -81,63 +103,177 @@ const DashboardPage = () => {
     });
 
     // 전체 템플릿 데이터
-    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>(DUMMY_TEMPLATES);
-    // 현재 화면에 보여줄 개수
-    const [visibleCount, setVisibleCount] = useState(8);
+    const [allTemplates, setAllTemplates] = useState<TemplateListItem[]>([]);
+    // 로딩 상태
+    const [isLoading, setIsLoading] = useState(false);
+    // 더보기 로딩 상태
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    // 현재 페이지
+    const [currentPage, setCurrentPage] = useState(1);
+    // 더 가져올 데이터가 있는지 여부
+    const [hasMore, setHasMore] = useState(true);
+
+    // 새 템플릿 버튼 클릭 시 뜨는 모달 상태
+    const [isTypeOpen, setIsTypeOpen] = useState(false);
+    const [isPresetOpen, setIsPresetOpen] = useState(false);
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
-        alert(option); // 정렬 기능은 이후 구현
+        setSelectedAlign(option);
+        // 선택값만 갱신; 데이터 로드는 useEffect에서 처리
     };
 
     // onChange: (category: string) => void;
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
-        setVisibleCount(8);
+        // 선택값만 갱신; 데이터 로드는 useEffect에서 처리
+    };
 
-        // TODO: 나중에 백엔드 API 연결 시 여기를 API 호출로 대체
-        // 선택된 카테고리에 맞게 필터링
-        if (category === "전체") {
-            setAllTemplates(DUMMY_TEMPLATES);
-        } else if (category === "즐겨찾기") {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.isBookmarked));
-        } else {
-            setAllTemplates(DUMMY_TEMPLATES.filter(t => t.categoryNm === category));
+    // 즐겨찾기 상태 변경 시 템플릿 목록 새로고침
+    const handleBookmarkToggle = () => {
+        setCurrentPage(1);
+        setAllTemplates([]);
+        setHasMore(true);
+        fetchTemplates(undefined, 1, true);
+    };
+
+    // 카테고리를 API 값으로 변환하는 함수
+    const getCategoryValue = (category: string) => {
+        switch (category) {
+            case "전체":
+                return "";
+            case "즐겨찾기":
+                return "0";
+            case "업무":
+                return "1";
+            case "생활":
+                return "2";
+            case "여행":
+                return "3";
+            default:
+                return undefined;
         }
     };
 
-    /*
-    // 템플릿 불러오기 (API)
-    useEffect(() => {
-        const fetchTemplates = async () => {
-            try {
-                const res = await axios.get("/api/templates", {
-                    params: { category: selectedCategory },
-                });
-                setAllTemplates(res.data); // ✅ 예: [{ templateNo: 1, title: "...", ... }]
-            } catch (err) {
-                console.error("템플릿 불러오기 실패:", err);
+    // 정렬 기준을 API 값으로 변환하는 함수
+    const getAlignValue = (align: string) => {
+        switch (align) {
+            case "최근 수정일":
+                return 0;
+            case "최근 생성일":
+                return 1;
+            case "알림 시간 임박":
+                return 2;
+            case "템플릿명":
+                return 3;
+            default:
+                return 0;
+        }
+    };
+
+    // 템플릿 불러오기 함수
+    const fetchTemplates = useCallback(async (alignOption?: string, page?: number, isReset?: boolean) => {
+        const targetPage = page || currentPage;
+        const sortOption = alignOption || selectedAlign;
+        const token = localStorage.getItem('token');
+
+        if (isReset) {
+            setIsLoading(true);
+        } else {
+            setIsLoadingMore(true);
+        }
+
+        try {
+            const categoryValue = getCategoryValue(selectedCategory);
+            const requestBody: {
+                page: number;
+                sort: number;
+                cateNo?: string;
+            } = {
+                page: targetPage,
+                sort: getAlignValue(sortOption)
+            };
+
+            // 전체가 아닌 경우에만 category 필드 추가
+            if (categoryValue) {
+                requestBody.cateNo = categoryValue;
             }
-        };
 
-        fetchTemplates();
-    }, [selectedCategory]);
-    */
+            console.log('API 요청:', requestBody);
 
-    /*
-    // 카테고리별 개수 불러오기 (API)
+            const response = await fetch("https://packupapi.xyz/temp/getUserTemplateDataList", {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error('템플릿 불러오기 실패');
+            }
+
+            const responseData = await response.json();
+            console.log('API 응답:', responseData);
+
+            const templates = responseData.templateDataList || [];
+            const templateCntList: TemplateCntList = responseData.templateCntList;
+
+            // 카테고리 개수 업데이트 (첫 페이지일 때만)
+            if (targetPage === 1 && templateCntList) {
+                setCategoryCounts({
+                    전체: templateCntList.totalCnt,
+                    즐겨찾기: templateCntList.totalFavoriteCnt,
+                    업무: templateCntList.totalOfficeCnt,
+                    생활: templateCntList.totalDailyCnt,
+                    여행: templateCntList.totalTripCnt,
+                });
+            }
+            const convertedTemplates = templates.map((template: ApiTemplate) => ({
+                templateNo: template.templateNo,
+                templateNm: template.templateNm,
+                categoryNm: template.cateNm,
+                regDt: template.regDt,
+                updDt: template.updDt || template.regDt,
+                isBookmarked: template.isFavorite === "Y",
+                thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
+            }));
+
+            // 첫 페이지이거나 리셋인 경우 새로 설정, 아니면 기존 데이터에 추가
+            if (isReset || targetPage === 1) {
+                setAllTemplates(convertedTemplates);
+            } else {
+                setAllTemplates(prev => [...prev, ...convertedTemplates]);
+            }
+
+            // 더 가져올 데이터가 있는지 확인 (가져온 데이터가 8개 미만이면 마지막 페이지)
+            setHasMore(templates.length >= 8);
+            setCurrentPage(targetPage);
+
+        } catch (err) {
+            console.error("템플릿 불러오기 실패:", err);
+            if (isReset || targetPage === 1) {
+                setAllTemplates(DUMMY_TEMPLATES);
+            }
+        } finally {
+            setIsLoading(false);
+            setIsLoadingMore(false);
+        }
+    }, [selectedCategory, selectedAlign, currentPage]);
+
     useEffect(() => {
         setCurrentPage(1);
         setAllTemplates([]);
         setHasMore(true);
-        fetchTemplatesWithSort(undefined, 1, true);
-    }, [selectedCategory, selectedAlign]);
+        fetchTemplates(undefined, 1, true);
+    }, [selectedCategory, selectedAlign, fetchTemplates]);
 
     // 더보기 버튼 클릭 시 다음 페이지 로드
     const handleLoadMore = () => {
         if (!isLoadingMore && hasMore) {
             const nextPage = currentPage + 1;
-            fetchTemplatesWithSort(undefined, nextPage, false);
+            fetchTemplates(undefined, nextPage, false);
         }
     };
 
@@ -164,13 +300,26 @@ const DashboardPage = () => {
                 </div>
                 <section className="flex w-[1200px] flex-col items-center gap-[32px]">
                     <CategoryTabs counts={categoryCounts} selected={selectedCategory} onChange={handleCategoryChange} />
-                    {allTemplates.length === 0 ? (
+                    {isLoading ? (
+                        <div className="pt-[50px] flex justify-center items-center">
+                            <p className="text-[#707070] text-center font-pretendard text-[16px] font-medium leading-[140%]">
+                                템플릿을 불러오는 중...
+                            </p>
+                        </div>
+                    ) : allTemplates.length === 0 ? (
                         <EmptyState />
                     ) : (
                         <>
-                            <TemplateGrid templates={visibleTemplates} />
-                            {visibleCount < allTemplates.length && (
-                                <Button onClick={() => setVisibleCount(prev => prev + 8)} className="w-[343px] h-[50px]" variant="line">더보기</Button>
+                            <TemplateGrid templates={visibleTemplates} onBookmarkToggle={handleBookmarkToggle} />
+                            {hasMore && (
+                                <Button 
+                                    onClick={handleLoadMore} 
+                                    disabled={isLoadingMore}
+                                    className="w-[343px] h-[50px]" 
+                                    variant="line"
+                                >
+                                    {isLoadingMore ? '불러오는 중...' : '더보기'}
+                                </Button>
                             )}
                         </>
                     )}
