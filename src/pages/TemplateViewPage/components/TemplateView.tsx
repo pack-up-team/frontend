@@ -65,10 +65,10 @@ type StackDef = { locNum: number; items: string[]; x: number; y: number };
 
 const TEXT_STACKS: Record<number, StackDef[]> = {
     4: [
-        { locNum: 1, items: ["스텝1 메모 A", "스텝1 메모 B"], x: 16, y: 35 },
-        { locNum: 2, items: ["스텝2 메모 A"], x: 16, y: 437 },
-        { locNum: 3, items: ["스텝3 메모 A", "스텝3 메모 B", "스텝3 메모 C"], x: 688, y: 52 },
-        { locNum: 4, items: ["스텝4 메모 A"], x: 688, y: 430 },
+        { locNum: 1, items: ["스텝1 메모 A", "스텝1 메모 B"], x: 20, y: 35 },
+        { locNum: 2, items: ["스텝2 메모 A"], x: 20, y: 437 },
+        { locNum: 3, items: ["스텝3 메모 A", "스텝3 메모 B", "스텝3 메모 C"], x: 668, y: 52 },
+        { locNum: 4, items: ["스텝4 메모 A"], x: 668, y: 430 },
     ],
 };
 
