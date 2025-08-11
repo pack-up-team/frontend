@@ -312,23 +312,6 @@ const DashboardPage = () => {
         }
     };
 
-    /*
-    // 카테고리별 개수 불러오기 (API)
-    useEffect(() => {
-        const fetchCategoryCounts = async () => {
-            try {
-                const res = await axios.get("/api/dashboard/categories");
-                // 🔗 예시 응답: { 전체: 12, 즐겨찾기: 2, 업무: 5, 생활: 3, 여행: 1 }
-                setCategoryCounts(res.data);
-            } catch (err) {
-                console.error("카테고리 개수 불러오기 실패:", err);
-            }
-        };
-
-        fetchCategoryCounts();
-    }, []);
-    */
-
     // 모든 템플릿을 표시 (페이지네이션으로 관리)
     const visibleTemplates = allTemplates;
 
