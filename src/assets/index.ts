@@ -48,3 +48,4 @@ export { default as ViewExportIcon } from './view-export.svg?react';
 export { default as ViewBackIcon } from './view-back.svg?react';
 export { default as ViewArrowDownIcon } from './view-arrow-down.svg?react';
 export { default as ViewArrowUpIcon } from './view-arrow-up.svg?react';
+export { default as EditClickIcon } from './edit-click.svg?react';
