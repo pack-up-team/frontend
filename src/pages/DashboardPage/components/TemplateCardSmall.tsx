@@ -35,20 +35,15 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
         setIsBookmarkLoading(true);
         const newBookmarkState = !bookmarked;
         setBookmarked(newBookmarkState); // 낙관적 UI 업데이트
-
+        
         const requestData = {
             templateNo: template.templateNo,
             isFavorite: newBookmarkState ? 'Y' : 'N'
         };
+        console.log("API 요청 데이터:", requestData);
 
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
-                setBookmarked((prev) => !prev);
-                setIsBookmarkLoading(false);
-                alert('로그인이 필요합니다.');
-                return;
-            }
             const response = await fetch('https://packupapi.xyz/temp/templateStatusUpdate', {
                 method: 'POST',
                 headers: {
@@ -58,16 +53,12 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
                 body: JSON.stringify(requestData)
             });
 
-            if (response.status === 401) {
-                setBookmarked((prev) => !prev);
-                localStorage.removeItem('token');
-                alert('세션이 만료되었습니다. 다시 로그인해주세요.');
-                return;
-            }
             if (!response.ok) {
                 throw new Error('즐겨찾기 상태 변경 실패');
             }
 
+            console.log(`템플릿 ${template.templateNo} 즐겨찾기 상태가 ${newBookmarkState ? '추가' : '제거'}되었습니다.`);
+            
             // 상위 컴포넌트에 변경 사항 알림 (템플릿 목록 새로고침용)
             if (onBookmarkToggle) {
                 onBookmarkToggle();
@@ -75,7 +66,7 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
         } catch (error) {
             // 실패 시 원래대로 복구
             setBookmarked((prev) => !prev);
-            console.error("북마크 상태 변경 실패:", error);
+            console.error("즐겨찾기 상태 변경 실패:", error);
         } finally {
             setIsBookmarkLoading(false);
         }
@@ -121,9 +112,9 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             }
 
             console.log(`템플릿 ${template.templateNo} 이름이 "${trimmedName}"으로 변경되었습니다.`);
-
+            
             onRename(template.templateNo, trimmedName); // 상위 컴포넌트에 알림
-
+            
             // 템플릿 목록 새로고침을 위해 onBookmarkToggle 재사용
             if (onBookmarkToggle) {
                 onBookmarkToggle();
@@ -133,14 +124,14 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             // 실패 시 원래 이름으로 복구
             setEditedName(template.templateNm);
         }
-
+        
         setIsEditing(false);
     };
 
     // 템플릿 삭제
     const handleDelete = async () => {
         const confirmDelete = window.confirm(`"${template.templateNm}" 템플릿을 삭제하시겠습니까?\n\n삭제된 템플릿은 복구할 수 없습니다.`);
-
+        
         if (!confirmDelete) {
             return;
         }
@@ -167,9 +158,9 @@ const TemplateCardSmall: React.FC<TemplateCardSmallProps> = ({
             }
 
             console.log(`템플릿 ${template.templateNo} "${template.templateNm}"이 삭제되었습니다.`);
-
+            
             onDelete(template.templateNo); // 상위 컴포넌트에 알림
-
+            
             // 템플릿 목록 새로고침을 위해 onBookmarkToggle 재사용
             if (onBookmarkToggle) {
                 onBookmarkToggle();
