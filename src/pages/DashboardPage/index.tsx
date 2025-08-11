@@ -260,9 +260,13 @@ const DashboardPage = () => {
         }
     }, [selectedCategory, selectedAlign]);
 
-    useEffect(() => {
-        fetchTemplatesWithSort();
-    }, [fetchTemplatesWithSort]);
+    // 더보기 버튼 클릭 시 다음 페이지 로드
+    const handleLoadMore = () => {
+        if (!isLoadingMore && hasMore) {
+            const nextPage = currentPage + 1;
+            fetchTemplatesWithSort(undefined, nextPage, false);
+        }
+    };
 
     /*
     // 카테고리별 개수 불러오기 (API)
