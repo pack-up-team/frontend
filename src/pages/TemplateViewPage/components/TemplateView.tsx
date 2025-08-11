@@ -1,4 +1,5 @@
 // import { useTemplateDetailStore } from "../../../stores/templateDetailStore";
+import StepText from "./StepText";
 
 // 전체 보드: 6x6
 // ox, oy: 서브그리드의 좌상단 원점(px)
@@ -59,16 +60,45 @@ const cells = [
     { totalSteps: 4, stepNo: 2, locNum: 3 }
 ];
 
+// 스텝별 텍스트박스 데이터
+type StackDef = { locNum: number; items: string[]; x: number; y: number };
+
+const TEXT_STACKS: Record<number, StackDef[]> = {
+    4: [
+        { locNum: 1, items: ["스텝1 메모 A", "스텝1 메모 B"], x: 16, y: 35 },
+        { locNum: 2, items: ["스텝2 메모 A"], x: 16, y: 437 },
+        { locNum: 3, items: ["스텝3 메모 A", "스텝3 메모 B", "스텝3 메모 C"], x: 688, y: 52 },
+        { locNum: 4, items: ["스텝4 메모 A"], x: 688, y: 430 },
+    ],
+};
+
+// 텍스트박스 컴포넌트 (스큐 + 회전 적용)
+const TextBox: React.FC<{ text: string }> = ({ text }) => (
+    <div
+        className="inline-block relative has-[.is-open]:z-[9999]"
+        style={{
+            transform: "skew(-30deg, 0deg) rotate(-30deg)",
+            transformOrigin: "center",
+            width: "110px",
+            background: "transparent",
+            border: "none",
+            padding: 0,
+        }}
+    >
+        <StepText text={text} />
+    </div>
+);
+
 const TemplateView = () => {
     // const { templateData } = useTemplateDetailStore();
     // const backgroundImage = `/cate-${templateData?.templateCateNo}-step-${templateData?.stepsList.length}.svg`;
     const backgroundImage = '/cate-2-step-4.svg'; // 테스트용 고정 경로
-
-    console.log(resolveGlobalCell(1, 1, 1)); // 임시 사용
+    const totalSteps = 4; // 지금 배경과 맞춤
 
     return (
         <div className="relative mx-auto w-[800px] h-[800px] bg-white">
             <img draggable={false} className="absolute w-[800px] h-[800px] left-0 top-0" src={backgroundImage} />
+            {/* 오브젝트 배치 */}
             {cells.map((cell, i) => {
                 const { gx, gy } = resolveGlobalCell(cell.totalSteps, cell.stepNo, cell.locNum);
                 return (
@@ -87,6 +117,21 @@ const TemplateView = () => {
                     />
                 );
             })}
+            {/* 스텝별 텍스트박스 */}
+            {TEXT_STACKS[totalSteps].map((stack, i) =>
+                stack.items.map((txt, idx) => (
+                    <div
+                        key={`${i}-${idx}`}
+                        className="absolute"
+                        style={{
+                            left: stack.x,
+                            top: stack.y + idx * 92, // 간격 포함 배치
+                        }}
+                    >
+                        <TextBox text={txt} />
+                    </div>
+                ))
+            )}
         </div>
     );
 };

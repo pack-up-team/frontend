@@ -31,7 +31,7 @@ const StepText = ({ text }: StepTextProps) => {
     }, []);
 
     return (
-        <div ref={containerRef} className={open ? boxOpenStyle : boxCloseStyle}>
+        <div ref={containerRef} className={`${open ? "is-open " : ""}${open ? boxOpenStyle : boxCloseStyle}`}>
             <p className={`${textStyle} ${open ? "line-clamp-7" : "line-clamp-2"}`}>{text}</p>
             <button onClick={() => setOpen((prev) => !prev)} className="cursor-pointer">
                 {open ? <ViewArrowUpIcon className="w-3 h-3" /> : <ViewArrowDownIcon className="w-3 h-3" />}
