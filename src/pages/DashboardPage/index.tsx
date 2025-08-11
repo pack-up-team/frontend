@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+// import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { AddIcon } from "../../assets";
@@ -8,6 +9,8 @@ import TemplateGrid from "./components/TemplateGrid";
 import EmptyState from "./components/EmptyState";
 import Footer from "../../components/Footer";
 import type { TemplateListItem } from "../../stores/templateListStore";
+import AddTemplateTypeModal from "./components/AddTemplateTypeModal";
+import PresetSetModal from "./components/PresetSetModal";
 
 // API 응답 템플릿 타입 정의
 interface ApiTemplate {
@@ -81,42 +84,10 @@ const DUMMY_TEMPLATES: TemplateListItem[] = [
     isBookmarked: true,
     thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
     },
-    {
-    templateNo: 7,
-    templateNm: "청소하기",
-    categoryNm: "생활",
-    regDt: "2025-07-25T17:00:00Z",
-    updDt: "2025-07-25T17:00:00Z",
-    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-    },
-    {
-    templateNo: 8,
-    templateNm: "장보기 리스트",
-    categoryNm: "생활",
-    regDt: "2025-07-24T16:30:00Z",
-    updDt: "2025-07-24T16:30:00Z",
-    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-    },
-    {
-    templateNo: 9,
-    templateNm: "운동 루틴",
-    categoryNm: "생활",
-    regDt: "2025-07-23T19:10:00Z",
-    updDt: "2025-07-23T19:10:00Z",
-    isBookmarked: true,
-    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-    },
-    {
-    templateNo: 10,
-    templateNm: "회사 행사 준비",
-    categoryNm: "업무",
-    regDt: "2025-07-22T11:00:00Z",
-    updDt: "2025-07-22T12:00:00Z",
-    thumbnail: "https://core-cdn-fe.toss.im/image/optimize/?src=https://blog-cdn.tosspayments.com/wp-content/uploads/2021/08/28011146/semo9.png?&w=3840&q=75"
-    },
 ];
 
 const DashboardPage = () => {
+    // const navigate = useNavigate();
     // 선택된 카테고리 상태
     const [selectedCategory, setSelectedCategory] = useState("전체");
     // 정렬 상태
@@ -141,6 +112,10 @@ const DashboardPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     // 더 가져올 데이터가 있는지 여부
     const [hasMore, setHasMore] = useState(true);
+
+    // 새 템플릿 버튼 클릭 시 뜨는 모달 상태
+    const [isTypeOpen, setIsTypeOpen] = useState(false);
+    const [isPresetOpen, setIsPresetOpen] = useState(false);
 
     // onAlignChange: (option: string) => void;
     const handleAlignChange = (option: string) => {
@@ -312,7 +287,8 @@ const DashboardPage = () => {
                 <div className="pt-[124px] mx-auto flex w-[1200px] justify-between items-center">
                     <div className="flex items-center gap-[31px]">
                         <h2 className="text-[#141414] text-center font-pretendard text-[26px] font-bold leading-normal">내 템플릿 목록</h2>
-                        <Button className="w-[200px] h-11">
+                        {/* 새 템플릿 버튼 -> 1단계 모달 오픈 */}
+                        <Button onClick={() => setIsTypeOpen(true)} className="w-[200px] h-11">
                             <AddIcon className="w-[18px] h-[18px]" />
                             <span className="text-white text-center font-pretendard text-[16px] font-medium leading-normal">새 템플릿</span>
                         </Button>
@@ -350,6 +326,30 @@ const DashboardPage = () => {
                 </section>
             </div>
             <Footer />
+
+            {/* 모달들 (포털로 최상단 렌더) */}
+            <AddTemplateTypeModal
+                isOpen={isTypeOpen}
+                onClose={() => setIsTypeOpen(false)}
+                onPick={(type) => {
+                    if (type === "new") {
+                        setIsTypeOpen(false);
+                        // TODO: navigate 사용해서 신규 템플릿 편집 화면으로 이동
+                    } else {
+                        setIsTypeOpen(false);
+                        setIsPresetOpen(true);
+                    }
+                }}
+            />
+            <PresetSetModal
+                isOpen={isPresetOpen}
+                onClose={() => setIsPresetOpen(false)}
+                onConfirm={(setId) => {
+                    setIsPresetOpen(false);
+                    console.log(setId); // 린트 에러 방지를 위해 임시로 넣어둠
+                    // TODO: navigate 사용해서 간편 템플릿 편집 화면으로 이동
+                }}
+            />
         </div>
     );
 };
