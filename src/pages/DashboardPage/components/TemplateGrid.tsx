@@ -24,7 +24,8 @@ const TemplateGrid: React.FC<TemplateGridProps> = ({ templates, onBookmarkToggle
                             onRename={() => {}}
                             onEdit={() => {}}
                             onDuplicate={() => {}}
-                            onDelete={() => {}} />
+                            onDelete={() => {}}
+                            onBookmarkToggle={onBookmarkToggle} />
                         ) : (
                             <div key={`placeholder-${rowIdx}-${idx}`} className="w-[276px] h-[374px] bg-transparent"></div>
                         )

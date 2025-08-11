@@ -45,215 +45,39 @@ const Header = ({ pageType = 'default' }: HeaderProps) => {
         // 예시: navigate(`/notification/${id}`);
     };
 
-    const [username, setUsername] = useState<string>("심심한알파카59223");
-    const [userId, setUserId] = useState<string>("");
-    // 사용자 정보 불러오기(JWT 토큰으로 인증)
-    useEffect(() => {
-        if (!isDefaultPage) return;
-
-        const abortController = new AbortController();
-        
-        const fetchUserInfo = async () => {
-            try {
-                const token = localStorage.getItem('token');
-
-                const response = await fetch("https://packupapi.xyz/api/user", {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include' // 쿠키의 JWT 토큰 자동 포함
-                });
-
-                if (!response.ok) {
-                    throw new Error('사용자 정보 불러오기 실패');
-                }
-
-                const userInfo = await response.json();
-    
-                // 다양한 키 중 첫 번째 존재하는 것 사용
-                setUsername(userInfo.username || userInfo.userName || userInfo.userId || userInfo.email || "심심한알파카59223");
-                setUserId(userInfo.userId);
-            } catch (err) {
-                if (err instanceof Error && err.name === 'AbortError') return;
-                console.error("사용자 정보 불러오기 실패: ", err);
-                setUsername("심심한알파카59223");
-                setUserId("");
-            }
-        };
-
-        fetchUserInfo();
-
-        return () => {
-            abortController.abort();
-        };
-    }, [isDefaultPage]);
-
-    // 자료형 선언
-    interface NotificationPayload {
-        templateNo: number;
-        templateNm: string;
-        message: string;
-        sentAt: string;
-        readYn: boolean;
-        thumbnail: string;
-    }
-
-    // 실시간 알림 SSE 구독요청
-    useEffect(() => {
-        if (!userId) return;
-
-        const url = `https://packupapi.xyz/notifications/subscribe?userId=${encodeURIComponent(userId)}`;
-
-        const es = new EventSource(url);
-
-        // 연결 이벤트 (브라우저 레벨)
-        es.onopen = () => console.log('[SSE] onopen');
-        es.onerror = (e) => console.warn('[SSE] onerror', e);
-
-        // 서버에서 보낸 커스텀 이벤트들
-        es.addEventListener('connect', (e: MessageEvent) => {
-            console.log('[SSE] event:connect =>', e.data);
-        });
-
-        // 실제 알림
-        const handlePayload = (e: MessageEvent) => {
-            let it: NotificationPayload;
-            try { it = JSON.parse(e.data); } catch { it = e.data; }
-
-            const n: Notification = {
-                id: it.templateNo,
-                title: it.templateNm,
-                memo: it.message,
-                timestamp: it.sentAt,
-                timeAgo: getTimeAgo(it.sentAt),
-                dateGroup: getDateGroup(it.sentAt),
-                read: Boolean(it.readYn),
-                thumbnail: it.thumbnail ?? undefined,
-            };
-
-            setNotifications(prev => {
-                const exists = prev.some(p => p.id === n.id);
-                const next = exists ? prev.map(p => (p.id === n.id ? n : p)) : [n, ...prev];
-                next.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-                return next;
-            });
-            if (!n.read) setUnreadCount(c => c + 1);
-        };
-
-        es.addEventListener('alarm', handlePayload);
-
-        return () => {
-            console.log('[SSE] closed');
-            es.close();
-        };
-    }, [userId]);
-
-    // 안읽은 알림 갯수 조회
-    const [unreadCount, setUnreadCount] = useState<number>(0);
-    useEffect(() => {
-        if (!userId) return; // userId 없으면 실행 안 함
-
-        const controller = new AbortController();
-
-        const fetchUnreadCount  = async () => {
-            try {
-                const response = await fetch(
-                    `https://packupapi.xyz/notifications/unread_count?userId=${encodeURIComponent(userId)}`,
-                    {
-                    method: 'GET',
-                    credentials: 'include',
-                    signal: controller.signal,
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error('안 읽은 알림 개수 불러오기 실패');
-                }
-
-                const data = await response.json(); // { count: number }
-                setUnreadCount(Number(data.count ?? 0));
-            } catch (err) {
-                if (err instanceof Error && err.name === 'AbortError') return;
-                console.error('안 읽은 알림 개수 조회 실패:', err);
-                setUnreadCount(0);
-            }
-        };
-
-        fetchUnreadCount ();
-    }, [userId]);
-
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-
-    const getTimeAgo = (iso: string) => {
-        const t = new Date(iso).getTime(), d = Date.now() - t;
-        const s = Math.floor(d/1000); if (s < 60) return '방금 전';
-        const m = Math.floor(s/60); if (m < 60) return `${m}분 전`;
-        const h = Math.floor(m/60); if (h < 24) return `${h}시간 전`;
-        const day = Math.floor(h/24); return `${day}일 전`;
-    };
-
-    const getDateGroup = (iso: string): Notification['dateGroup'] => {
-        const d = new Date(iso), now = new Date();
-        const start = (x:Date)=> new Date(x.getFullYear(), x.getMonth(), x.getDate());
-        const one = 86400000;
-        const today = +start(now), target = +start(d);
-        if (target === today) return '오늘';
-        if (target === today - one) return '어제';
-        const dayIdx = (n:Date)=>(n.getDay()+6)%7; // 월=0
-        const sow = (()=>{ const s=start(now); s.setDate(s.getDate()-dayIdx(now)); return +s; })();
-        if (target >= sow) return '이번 주';
-        if (target >= sow - 7*one) return '지난 주';
-        return '지난 주';
-    };
-
-    // 알림 목록 조회
-    useEffect(() => {
-        if (!userId) return;
-        const controller = new AbortController();
-
-        (async () => {
-            try {
-                const res = await fetch(
-                    `https://packupapi.xyz/notifications/list?userId=${encodeURIComponent(userId)}`,
-                    { method: 'GET', credentials: 'include', signal: controller.signal }
-                );
-                if (!res.ok) throw new Error('알림 목록 불러오기 실패');
-
-                // 서버 응답 예시 가정: [{ id, title, memo, timestamp, read, thumbnail }]
-                const raw: NotificationPayload[] = await res.json();
-
-                const mapped: Notification[] = raw.map((it) => ({
-                    id: Number(it.templateNo),
-                    title: String(it.templateNm ?? ''),
-                    memo: it.message ?? '',
-                    timestamp: it.sentAt, // 정렬용
-                    timeAgo: getTimeAgo(it.sentAt),
-                    dateGroup: getDateGroup(it.sentAt),
-                    read: Boolean(it.readYn),
-                    thumbnail: it.thumbnail ?? undefined,
-                }));
-
-                // 최신순 정렬
-                mapped.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-                setNotifications(mapped);
-            } catch (err) {
-                if (err instanceof Error && err.name === 'AbortError') return;
-                console.error('알림 목록 조회 실패:', err);
-                setNotifications([]);
-            }
-        })();
-
-        return () => controller.abort();
-    }, [userId]);
-
+    // username: string;
+    const username = "심심한알파카59223";
     // onLogout: () => void;
-    const handleLogout = () => {
-        // TODO: 실제 로그아웃 처리 로직을 여기에 구현하세요
-        console.log("사용자 로그아웃 처리");
-        // 예시: authService.logout(); navigate('/');
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            
+            console.log("로그아웃 API 호출 시작");
+            
+            const response = await fetch('https://packupapi.xyz/api/lgn/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('로그아웃 실패');
+            }
+
+            console.log('로그아웃 성공');
+            
+            // 로컬 스토리지에서 토큰 제거
+            localStorage.removeItem('token');
+            
+            // 랜딩페이지로 이동 (루트 경로)
+            navigate('/');
+            
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+            alert('로그아웃에 실패했습니다. 다시 시도해주세요.');
+        }
     };
     // onMyPage: () => void;
     const handleMyPage = () => {
