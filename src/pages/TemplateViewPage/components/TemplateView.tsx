@@ -92,6 +92,7 @@ const TextBox: React.FC<{ text: string }> = ({ text }) => (
 const TemplateView = () => {
     // const { templateData } = useTemplateDetailStore();
     // const backgroundImage = `/cate-${templateData?.templateCateNo}-step-${templateData?.stepsList.length}.svg`;
+    // 서버 배경 이미지 경로: https://packupapi.xyz/images/background/daily/step4.svg
     const backgroundImage = '/cate-2-step-4.svg'; // 테스트용 고정 경로
     const totalSteps = 4; // 지금 배경과 맞춤
 
@@ -104,7 +105,7 @@ const TemplateView = () => {
                 return (
                     <img
                         key={i}
-                        src="https://packupapi.xyz/images/office/Backpack.png"
+                        src="https://packupapi.xyz/images/object/daily/Backpack.png"
                         draggable={false} // 드래그 미리보기 방지
                         className="absolute"
                         style={{
