@@ -1,10 +1,10 @@
 import { create } from "zustand";
 
 export type PanelMode = "ADD_ITEM" | "EDIT_STEP" | "EDIT_ITEM" | "EDIT_TEXT";
-export type Category = "업무" | "생활" | "여행";
+export type Category = "office" | "daily" | "trip";
 
-interface Step { id: number; name: string; textIds: number[]; }
-interface Item { id: number; name: string; cate: Category; }
+interface Step { id: number; name: string; itemIds: number[]; textIds: number[]; }
+interface Item { id: number; name: string; cate: Category; catalogId?: number; }
 interface TextBox { id: number; value: string; }
 
 interface EditorState {
@@ -30,17 +30,17 @@ interface EditorState {
     addTextToStep: (stepId: number) => number;
     removeTextFromStep: (stepId: number, textId: number) => void;
     reorderTextInStep: (stepId: number, from: number, to: number) => void;
+
+    addItemToStep: (stepId: number, payload: { catalogId: number; name: string; cate: Category }) => number;
 }
 
 function nextIdFromState(s: EditorState): number {
     let maxId = 0;
 
-    // step / textIds / items / texts 전체에서 최대값 찾기
     for (const st of s.steps) {
         if (st.id > maxId) maxId = st.id;
-        for (const tid of st.textIds ?? []) {
-            if (tid > maxId) maxId = tid;
-        }
+        for (const tid of st.textIds) if (tid > maxId) maxId = tid;
+        for (const iid of st.itemIds) if (iid > maxId) maxId = iid;
     }
     for (const it of s.items) if (it.id > maxId) maxId = it.id;
     for (const t of s.texts) if (t.id > maxId) maxId = t.id;
@@ -49,7 +49,9 @@ function nextIdFromState(s: EditorState): number {
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
-    steps: [{ id: 1, name: "STEP1", textIds: [] }],
+    steps: [
+        { id: 1, name: "STEP1", itemIds: [], textIds: [] },
+    ],
     items: [],
     texts: [],
 
@@ -107,4 +109,18 @@ export const useEditorStore = create<EditorState>((set) => ({
                 return { ...st, textIds: arr };
             }),
         })),
+    addItemToStep: (stepId, payload) => {
+        let created = 0;
+        set((s) => {
+            const id = nextIdFromState(s);
+            created = id;
+            return {
+                items: [...s.items, { id, name: payload.name, cate: payload.cate, catalogId: payload.catalogId }],
+                steps: s.steps.map((st) =>
+                    st.id === stepId ? { ...st, itemIds: [...st.itemIds, id] } : st
+                ),
+            };
+        });
+        return created;
+    },
 }));

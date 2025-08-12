@@ -50,3 +50,6 @@ export { default as ViewArrowDownIcon } from './view-arrow-down.svg?react';
 export { default as ViewArrowUpIcon } from './view-arrow-up.svg?react';
 export { default as EditClickIcon } from './edit-click.svg?react';
 export { default as HandleIcon } from './handle.svg?react';
+export { default as SearchIcon } from './search.svg?react';
+export { default as CloseFilledIcon } from './close-filled.svg?react';
+export { default as ResultNoneIcon } from './result-none.svg?react';
