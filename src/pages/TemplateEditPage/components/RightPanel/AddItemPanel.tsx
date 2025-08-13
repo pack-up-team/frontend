@@ -182,111 +182,114 @@ export default function AddItemPanel() {
     }, [serverList, q]);
 
     return (
-        <div className="inline-flex flex-col items-start gap-4">
-            {/* 서브 탭 */}
-            <div className="flex items-center self-stretch">
-                <button
-                    className={`flex h-[50px] py-4 justify-center items-center gap-2 [flex:1_0_0] text-center font-pretendard text-lg font-semibold leading-normal ${tab === "ALL" ? "border-b-[3px] border-[#775CFF] text-[#141414]" : "text-[#949494]"}`}
-                    onClick={() => setTab("ALL")}
-                >
-                    전체
-                </button>
-                <button
-                    className={`flex h-[50px] py-4 justify-center items-center gap-2 [flex:1_0_0] text-center font-pretendard text-lg font-semibold leading-normal ${tab === "RECO" ? "border-b-[3px] border-[#775CFF] text-[#141414]" : "text-[#949494]"}`}
-                    onClick={() => setTab("RECO")}
-                >
-                    추천
-                </button>
-            </div>
+        <div className="flex h-full flex-col gap-4">
+            <div className="shrink-0 flex flex-col gap-4">
+                {/* 서브 탭 */}
+                <div className="flex items-center self-stretch">
+                    <button
+                        className={`flex h-[50px] py-4 justify-center items-center gap-2 [flex:1_0_0] text-center font-pretendard text-lg font-semibold leading-normal ${tab === "ALL" ? "border-b-[3px] border-[#775CFF] text-[#141414]" : "text-[#949494]"}`}
+                        onClick={() => setTab("ALL")}
+                    >
+                        전체
+                    </button>
+                    <button
+                        className={`flex h-[50px] py-4 justify-center items-center gap-2 [flex:1_0_0] text-center font-pretendard text-lg font-semibold leading-normal ${tab === "RECO" ? "border-b-[3px] border-[#775CFF] text-[#141414]" : "text-[#949494]"}`}
+                        onClick={() => setTab("RECO")}
+                    >
+                        추천
+                    </button>
+                </div>
 
-            {/* 검색 */}
-            <div className="flex w-[400px] h-14 px-4 py-2 items-center gap-2 flex-shrink-0 rounded-lg border border-[#CCC] focus-within:border-[#141414]">
-                <SearchIcon className="w-[18px] h-[18px]" />
-                <input
-                    className="outline-none border-none flex-1 placeholder:text-[#949494] placeholder:font-pretendard placeholder:text-base placeholder:font-medium placeholder:leading-normal"
-                    placeholder="준비물 검색"
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                />
-                {q && (
-                    <div className="flex h-[38px] pr-0 pl-[22px] py-[11px] justify-end items-center">
-                        <button className="w-[16px] h-[16px] cursor-pointer" onClick={() => setQ("")}>
-                            <CloseFilledIcon className="w-[16px] h-[16px]" />
-                        </button>
+                {/* 검색 */}
+                <div className="flex w-[400px] h-14 px-4 py-2 items-center gap-2 flex-shrink-0 rounded-lg border border-[#CCC] focus-within:border-[#141414]">
+                    <SearchIcon className="w-[18px] h-[18px]" />
+                    <input
+                        className="outline-none border-none flex-1 placeholder:text-[#949494] placeholder:font-pretendard placeholder:text-base placeholder:font-medium placeholder:leading-normal"
+                        placeholder="준비물 검색"
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                    />
+                    {q && (
+                        <div className="flex h-[38px] pr-0 pl-[22px] py-[11px] justify-end items-center">
+                            <button className="w-[16px] h-[16px] cursor-pointer" onClick={() => setQ("")}>
+                                <CloseFilledIcon className="w-[16px] h-[16px]" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* divider */}
+                <div className="h-0 self-stretch">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="401" height="3" viewBox="0 0 401 3" fill="none">
+                        <path d="M0.75 1.32812H400.75" stroke="#F0F0F0" stroke-width="2"/>
+                    </svg>
+                </div>
+
+                {/* 카테고리 */}
+                <div className="flex w-[400px] flex-col items-start gap-3">
+                    <span className="self-stretch text-[#141414] font-pretendard text-base font-bold leading-normal">카테고리</span>
+                    <div className="flex items-center gap-4 self-stretch">
+                        {(["office", "daily", "trip"] as const).map((c) => (
+                            <Button
+                                key={c}
+                                variant={cate === c ? "fill" : "line"}
+                                className={`flex-1 h-[38px] !p-0 ${cate === c ? "!bg-[#5736FF]" : ""}`}
+                                onClick={() => setCate(c)}
+                            >
+                                {CATEGORY_LABELS[c]}
+                            </Button>
+                        ))}
                     </div>
+                </div>
+
+                {/* divider */}
+                <div className="h-0 self-stretch">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="401" height="3" viewBox="0 0 401 3" fill="none">
+                        <path d="M0.75 1.32812H400.75" stroke="#F0F0F0" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+            {/* 목록 영역 */}
+            <div className="flex-1 min-h-0">
+                {loading ? (
+                    <p className="mx-auto pt-[166px] text-[#707070] text-center font-pretendard text-base font-medium leading-[140%]">불러오는 중…</p>
+                ) : error ? (
+                    <p className="mx-auto pt-[166px] text-[#D90050] text-center font-pretendard text-base font-medium leading-[140%]">{error}</p>
+                ) : filtered.length === 0 ? (
+                    <div className="flex py-[100px] flex-col items-center gap-4 [flex:1_0_0] self-stretch">
+                        <ResultNoneIcon className="w-[50px] h-[50px]" />
+                        <p className="mx-auto text-[#707070] text-center font-pretendard text-base font-medium leading-[140%]">검색 결과가 없습니다.</p>
+                    </div>
+                ) : (
+                    // 간격 확인 필요
+                    <ul className="w-ful h-full grid grid-cols-4 gap-y-4 overflow-y-auto">
+                        {filtered.map((c) => {
+                            return (
+                                <li key={c.id}>
+                                    <button
+                                        className="flex w-[90px] h-[90px] justify-center items-center rounded-lg border border-transparent hover:border-[#8D76FF]"
+                                        disabled={isFull}
+                                        onClick={() => {
+                                            const stepId = pickFirstStepHasSpace(slimSteps);
+                                            if (!stepId) return; // 가득 찼으면 무시
+                                            addItemToStep(stepId, {
+                                                catalogId: c.id,
+                                                name: c.name,
+                                                cate: c.cate,
+                                            });
+                                        }}
+                                    >
+                                        <img
+                                            src={`https://packupapi.xyz/images/object/${c.cate}/${c.name}.png`}
+                                            alt={c.name}
+                                        />
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
                 )}
             </div>
-
-            {/* divider */}
-            <div className="h-0 self-stretch">
-                <svg xmlns="http://www.w3.org/2000/svg" width="401" height="3" viewBox="0 0 401 3" fill="none">
-                    <path d="M0.75 1.32812H400.75" stroke="#F0F0F0" stroke-width="2"/>
-                </svg>
-            </div>
-
-            {/* 카테고리 */}
-            <div className="flex w-[400px] flex-col items-start gap-3">
-                <span className="self-stretch text-[#141414] font-pretendard text-base font-bold leading-normal">카테고리</span>
-                <div className="flex items-center gap-4 self-stretch">
-                    {(["office", "daily", "trip"] as const).map((c) => (
-                        <Button
-                            key={c}
-                            variant={cate === c ? "fill" : "line"}
-                            className={`flex-1 h-[38px] !p-0 ${cate === c ? "!bg-[#5736FF]" : ""}`}
-                            onClick={() => setCate(c)}
-                        >
-                            {CATEGORY_LABELS[c]}
-                        </Button>
-                    ))}
-                </div>
-            </div>
-
-            {/* divider */}
-            <div className="h-0 self-stretch">
-                <svg xmlns="http://www.w3.org/2000/svg" width="401" height="3" viewBox="0 0 401 3" fill="none">
-                    <path d="M0.75 1.32812H400.75" stroke="#F0F0F0" stroke-width="2"/>
-                </svg>
-            </div>
-
-            {/* 목록 영역 */}
-            {loading ? (
-                <p className="mx-auto pt-[166px] text-[#707070] text-center font-pretendard text-base font-medium leading-[140%]">불러오는 중…</p>
-            ) : error ? (
-                <p className="mx-auto pt-[166px] text-[#D90050] text-center font-pretendard text-base font-medium leading-[140%]">{error}</p>
-            ) : filtered.length === 0 ? (
-                <div className="flex py-[100px] flex-col items-center gap-4 [flex:1_0_0] self-stretch">
-                    <ResultNoneIcon className="w-[50px] h-[50px]" />
-                    <p className="mx-auto text-[#707070] text-center font-pretendard text-base font-medium leading-[140%]">검색 결과가 없습니다.</p>
-                </div>
-            ) : (
-                // 간격 확인 필요
-                <ul className="w-full grid grid-cols-4 gap-y-4 overflow-y-auto">
-                    {filtered.map((c) => {
-                        return (
-                            <li key={c.id}>
-                                <button
-                                    className="flex w-[90px] h-[90px] justify-center items-center rounded-lg border border-transparent hover:border-[#8D76FF]"
-                                    disabled={isFull}
-                                    onClick={() => {
-                                        const stepId = pickFirstStepHasSpace(slimSteps);
-                                        if (!stepId) return; // 가득 찼으면 무시
-                                        addItemToStep(stepId, {
-                                            catalogId: c.id,
-                                            name: c.name,
-                                            cate: c.cate,
-                                        });
-                                    }}
-                                >
-                                    <img
-                                        src={`https://packupapi.xyz/images/object/${c.cate}/${c.name}.png`}
-                                        alt={c.name}
-                                    />
-                                </button>
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
         </div>
     );
 }

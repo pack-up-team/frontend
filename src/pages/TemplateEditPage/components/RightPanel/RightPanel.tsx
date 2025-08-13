@@ -13,7 +13,7 @@ export default function RightPanel() {
     const isAttr = mode !== "ADD_ITEM";
 
     return (
-        <aside className="flex px-4 pt-4 pb-0 flex-col items-start gap-4 self-stretch">
+        <aside className="h-[calc(100vh-144px)] flex px-4 pt-4 pb-0 flex-col items-start gap-4 self-stretch">
             {/* 1차 탭 */}
             <div className="flex w-[400px] p-2 items-center rounded-xl bg-[#E5E5E5]">
                 <TopTab
