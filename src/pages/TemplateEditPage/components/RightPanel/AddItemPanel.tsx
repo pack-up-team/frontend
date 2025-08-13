@@ -73,6 +73,10 @@ function pickFirstStepHasSpace(
     return null;
 }
 
+function isAbortError(e: unknown): boolean {
+    return (e instanceof DOMException || e instanceof Error) && e.name === "AbortError";
+}
+
 export default function AddItemPanel() {
     const steps = useEditorStore((s) => s.steps);
     const addItemToStep = useEditorStore((s) => s.addItemToStep);
@@ -150,6 +154,7 @@ export default function AddItemPanel() {
                 }));
                 setServerList(mapped);
             } catch (e: unknown) {
+                if (isAbortError(e)) return;
                 const msg = e instanceof Error ? e.message : "요청 중 오류가 발생했습니다.";
                 setServerList([]);
                 setError(msg);

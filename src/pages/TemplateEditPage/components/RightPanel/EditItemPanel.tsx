@@ -9,7 +9,7 @@ export default function EditItemPanel() {
 
     if (!selectedItemId || !item) {
         return (
-            <div className="flex flex-col items-center gap-4 py-[100px] flex-1 self-stretch">
+            <div className="w-[400px] flex flex-col items-center gap-4 py-[100px] flex-1 self-stretch">
                 <EditClickIcon className="w-[50px] h-[50px]" />
                 <p className="text-[#707070] text-center font-pretendard text-base font-medium leading-[140%]">편집할 준비물을 클릭하세요.</p>
             </div>
