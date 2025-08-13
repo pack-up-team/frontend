@@ -3,7 +3,20 @@ import { create } from "zustand";
 export type PanelMode = "ADD_ITEM" | "EDIT_STEP" | "EDIT_ITEM" | "EDIT_TEXT";
 export type Category = "office" | "daily" | "trip";
 
-interface Step { id: number; name: string; itemIds: number[]; textIds: number[]; }
+export type BackgroundKey =
+    | "office-1" | "office-2" | "office-3" | "office-4"
+    | "daily-1"  | "daily-2"  | "daily-3"  | "daily-4"
+    | "trip-1"   | "trip-2"   | "trip-3"   | "trip-4";
+
+interface Step {
+    id: number;
+    name: string;
+    itemIds: number[];
+    textIds: number[];
+    // 캔버스 배치
+    itemSlotById?: Record<number, number | undefined>;
+    textSlotById?: Record<number, number | undefined>;
+}
 interface Item { id: number; name: string; cate: Category; catalogId?: number; }
 interface TextBox { id: number; value: string; }
 
@@ -11,6 +24,8 @@ interface EditorState {
     steps: Step[];
     items: Item[];
     texts: TextBox[];
+
+    background: BackgroundKey; // 현재 배경
 
     mode: PanelMode;
     selectedStepId?: number;
@@ -23,6 +38,9 @@ interface EditorState {
     selectItem: (id: number) => void;
     selectText: (id: number) => void;
 
+    setBackground: (cat: Category, stepsCount: 1 | 2 | 3 | 4) => void;
+    setStepCount: (stepsCount: 1 | 2 | 3 | 4) => void;
+
     renameStep: (id: number, name: string) => void;
     renameItem: (id: number, name: string) => void;
     setTextValue: (id: number, v: string) => void;
@@ -32,6 +50,12 @@ interface EditorState {
     reorderTextInStep: (stepId: number, from: number, to: number) => void;
 
     addItemToStep: (stepId: number, payload: { catalogId: number; name: string; cate: Category }) => number;
+
+    // 캔버스 드래그-스냅 결과
+    placeItem: (stepId: number, itemId: number, slotIndex: number) => void;
+    placeText: (stepId: number, textId: number, slotIndex: number) => void;
+
+    moveItemAcrossSteps: (itemId: number, fromStepId: number, toStepId: number) => void;
 }
 
 function nextIdFromState(s: EditorState): number {
@@ -48,12 +72,26 @@ function nextIdFromState(s: EditorState): number {
     return maxId + 1;
 }
 
-export const useEditorStore = create<EditorState>((set) => ({
+function ensureMaps(st: Step): Step {
+    return {
+        ...st,
+        itemSlotById: st.itemSlotById ?? {},
+        textSlotById: st.textSlotById ?? {},
+    };
+}
+
+function makeBg(cat: Category, steps: 1 | 2 | 3 | 4): BackgroundKey {
+    return `${cat}-${steps}` as BackgroundKey;
+}
+
+export const useEditorStore = create<EditorState>((set, get) => ({
     steps: [
-        { id: 1, name: "STEP1", itemIds: [], textIds: [] },
+        { id: 1, name: "STEP1", itemIds: [], textIds: [], itemSlotById: {}, textSlotById: {} },
     ],
     items: [],
     texts: [],
+
+    background: makeBg("office", 4),
 
     mode: "ADD_ITEM",
 
@@ -61,6 +99,43 @@ export const useEditorStore = create<EditorState>((set) => ({
     selectStep: (id) => set({ selectedStepId: id, mode: "EDIT_STEP" }),
     selectItem: (id) => set({ selectedItemId: id, mode: "EDIT_ITEM" }),
     selectText: (id) => set({ selectedTextId: id, mode: "EDIT_TEXT" }),
+
+    setBackground: (cat, stepsCount) => {
+        // 배경키 갱신
+        set({ background: makeBg(cat, stepsCount) });
+        // 스텝 수도 함께 맞추고, 배치 맵은 초기화
+        get().setStepCount(stepsCount);
+    },
+
+    setStepCount: (stepsCount) => {
+        set((s) => {
+            const steps = s.steps
+                .slice(0, stepsCount)
+                .map((st) => {
+                    const safe = ensureMaps(st);
+                    return {
+                        ...safe,
+                        // 레이아웃이 달라질 수 있으므로 배치 맵 초기화
+                        itemSlotById: {},
+                        textSlotById: {},
+                    };
+                });
+    
+            while (steps.length < stepsCount) {
+                const newId = nextIdFromState({ ...s, steps });
+                steps.push({
+                    id: newId,
+                    name: `STEP${steps.length + 1}`,
+                    itemIds: [],
+                    textIds: [],
+                    itemSlotById: {},
+                    textSlotById: {},
+                });
+            }
+    
+            return { steps };
+        });
+    },
 
     renameStep: (id, name) =>
         set((s) => ({
@@ -79,11 +154,16 @@ export const useEditorStore = create<EditorState>((set) => ({
         set((s) => {
             const id = nextIdFromState(s);
             createdId = id;
-
             return {
                 texts: [...s.texts, { id, value: "" }],
                 steps: s.steps.map((st) =>
-                    st.id === stepId ? { ...st, textIds: [...(st.textIds ?? []), id] } : st
+                    st.id === stepId
+                        ? {
+                                ...ensureMaps(st),
+                                textIds: [...st.textIds, id],
+                                // 슬롯 자동할당은 캔버스에서 placeText로 처리
+                            }
+                        : st
                 ),
             };
         });
@@ -92,11 +172,13 @@ export const useEditorStore = create<EditorState>((set) => ({
     removeTextFromStep: (stepId, textId) =>
         set((s) => ({
             texts: s.texts.filter((t) => t.id !== textId),
-            steps: s.steps.map((st) =>
-                st.id === stepId
-                    ? { ...st, textIds: st.textIds.filter((id) => id !== textId) }
-                    : st
-            ),
+            steps: s.steps.map((st) => {
+                if (st.id !== stepId) return st;
+                const safe = ensureMaps(st);
+                const map = { ...(safe.textSlotById ?? {}) };
+                delete map[textId];
+                return { ...safe, textIds: safe.textIds.filter((id) => id !== textId), textSlotById: map };
+            }),
             selectedTextId: s.selectedTextId === textId ? undefined : s.selectedTextId,
         })),
     reorderTextInStep: (stepId, from, to) =>
@@ -117,10 +199,56 @@ export const useEditorStore = create<EditorState>((set) => ({
             return {
                 items: [...s.items, { id, name: payload.name, cate: payload.cate, catalogId: payload.catalogId }],
                 steps: s.steps.map((st) =>
-                    st.id === stepId ? { ...st, itemIds: [...st.itemIds, id] } : st
+                    st.id === stepId
+                        ? {
+                                ...ensureMaps(st),
+                                itemIds: [...st.itemIds, id],
+                                // 슬롯 자동할당은 캔버스에서 placeItem으로 처리
+                            }
+                        : st
                 ),
             };
         });
         return created;
     },
+    placeItem: (stepId, itemId, slotIndex) =>
+        set((s) => ({
+            steps: s.steps.map((st) => {
+                if (st.id !== stepId) return st;
+                const safe = ensureMaps(st);
+                return { ...safe, itemSlotById: { ...safe.itemSlotById, [itemId]: slotIndex } };
+            }),
+        })),
+    placeText: (stepId, textId, slotIndex) =>
+        set((s) => ({
+            steps: s.steps.map((st) => {
+                if (st.id !== stepId) return st;
+                const safe = ensureMaps(st);
+                return { ...safe, textSlotById: { ...safe.textSlotById, [textId]: slotIndex } };
+            }),
+        })),
+    moveItemAcrossSteps: (itemId, fromStepId, toStepId) =>
+        set((s) => {
+            if (fromStepId === toStepId) return {};
+            const steps = s.steps.map((st) => {
+                if (st.id === fromStepId) {
+                    // from 에서 리스트 & 슬롯 매핑 제거
+                    const slots = { ...(st.itemSlotById ?? {}) };
+                    delete slots[itemId];
+                    return {
+                        ...st,
+                        itemIds: st.itemIds.filter((id) => id !== itemId),
+                        itemSlotById: slots,
+                    }
+                }
+                if (st.id === toStepId) {
+                    // to 에 중복이 없다면 추가
+                    return st.itemIds.includes(itemId)
+                        ? st
+                        : { ...st, itemIds: [...st.itemIds, itemId] };
+                }
+                return st;
+            });
+            return { steps };
+        }),
 }));
