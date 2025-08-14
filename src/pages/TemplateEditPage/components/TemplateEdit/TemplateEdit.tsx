@@ -29,9 +29,19 @@ export default function TemplateEdit() {
 
     const containerRef = useRef<HTMLDivElement | null>(null);
     const CANVAS = 800;
+    const DELETE_MARGIN = 32; // 캔버스 밖 판정 여유 px
 
     // 드래그 중 상태(가이드 표시용)
     const [active, setActive] = useState<ActiveItem | null>(null);
+    const [deletePreview, setDeletePreview] = useState(false); // 밖으로 나가면 삭제 미리보기
+
+    // 캔버스(0..800) 밖인지 판단
+    const isOutsideCanvas = (p: { x: number; y: number }) => {
+        return (
+            p.x < -DELETE_MARGIN || p.x > CANVAS + DELETE_MARGIN ||
+            p.y < -DELETE_MARGIN || p.y > CANVAS + DELETE_MARGIN
+        );
+    };
 
     // dnd 센서
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -48,7 +58,6 @@ export default function TemplateEdit() {
         
         // 현재 스텝 개수와 다르면 조정
         if (steps.length !== expectedSteps) {
-            console.log(`Steps 조정: ${steps.length} → ${expectedSteps}`);
             setStepCount(expectedSteps);
         }
     }, [background, steps.length, setStepCount]);
@@ -236,6 +245,14 @@ export default function TemplateEdit() {
         if (!p) return;
         setLastPointer(p);
 
+        // 캔버스 밖이면: 삭제 미리보기 ON, 하이라이트 해제
+        if (isOutsideCanvas(p)) {
+            setDeletePreview(true);
+            setHover(null);
+            return;
+        }
+
+        setDeletePreview(false);
         const best = findNearestVacant(p.x, p.y, fromStepId, itemId, active.originSlot);
         setHover(best);
     };
@@ -259,6 +276,17 @@ export default function TemplateEdit() {
             setActive(null);
             setHover(null);
             setLastPointer(null);
+            setDeletePreview(false);
+            return;
+        }
+
+        // 캔버스 밖으로 드롭 → 삭제 처리(해당 스텝에서 슬롯 -1)
+        if (isOutsideCanvas(p)) {
+            placeItem(fromStepId, itemId, -1);
+            setActive(null);
+            setHover(null);
+            setLastPointer(null);
+            setDeletePreview(false);
             return;
         }
 
@@ -282,6 +310,7 @@ export default function TemplateEdit() {
         setActive(null);
         setHover(null);
         setLastPointer(null);
+        setDeletePreview(false);
     };
 
     return (
@@ -292,7 +321,20 @@ export default function TemplateEdit() {
                 <div className="absolute inset-0 w-[800px] h-[800px] pointer-events-none select-none z-0">
                     <BackgroundImage bg={background} />
                 </div>
-
+                {/* ✅ 삭제 미리보기: 반드시 컨테이너(800×800) 내부에서 absolute */}
+                {deletePreview && (
+                    <div className="absolute inset-0 pointer-events-none z-30">
+                        <div className="absolute inset-0" style={{ background: "rgba(239,68,68,0.08)" }} />
+                        <div
+                            className="absolute"
+                            style={{
+                                left: 6, top: 6, right: 6, bottom: 6,
+                                border: "3px dashed #EF4444",
+                                boxSizing: "border-box"
+                            }}
+                        />
+                    </div>
+                )}
                 <DndContext sensors={sensors} onDragStart={onDragStart} onDragMove={onDragMove} onDragEnd={onDragEnd}>
                     {/* 가이드: 모든 스텝에 대해, 부모가 계산한 grid를 직접 전달 */}
                     {active && steps.map((st, sIdx) => {
@@ -319,7 +361,8 @@ export default function TemplateEdit() {
                             const item = items.find((it) => it.id === itemId);
                             if (!item) return null;
                             const idx = map[itemId];
-                            if (typeof idx !== "number") return null;
+                            // 삭제 표시(slot = -1)이면 렌더하지 않음
+                            if (typeof idx !== "number" || idx < 0) return null;
                             const base = toPx(grid.itemSlots[idx]);
                             return (
                                 <DraggableItem
