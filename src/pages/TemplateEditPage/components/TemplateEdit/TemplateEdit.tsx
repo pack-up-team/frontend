@@ -455,6 +455,7 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
 
 // 캔버스 좌표(x,y)에 템플릿 보기용 StepText를 절대배치해서 재사용
 function PositionedStepText({ x, y, text }: { x: number; y: number; text: string }) {
+    const [open, setOpen] = useState(false);
     return (
         <div
             style={{
@@ -464,11 +465,11 @@ function PositionedStepText({ x, y, text }: { x: number; y: number; text: string
                 // 기본 배치 + 회전 30도 + 스큐 30도
                 transform: `translate(-50%, -50%) rotate(-30deg) skewX(-30deg)`,
                 transformOrigin: "50% 50%",
-                zIndex: 2, // 평상시 아이템(zIndex:1) 위, 드래그 중 아이템(zIndex:10) 아래
+                zIndex: open ? 100 : 2,
             }}
             className="pointer-events-auto"
         >
-            <StepText text={text || "텍스트"} />
+            <StepText text={text || "텍스트"} open={open} onOpenChange={setOpen} />
         </div>
     );
 }
