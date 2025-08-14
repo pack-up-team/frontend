@@ -11,6 +11,7 @@ export type BackgroundKey =
 interface Step {
     id: number;
     name: string;
+    label?: string; // 스텝 표시용 라벨(빈 문자열 허용)
     itemIds: number[];
     textIds: number[];
     // 캔버스 배치
@@ -45,6 +46,7 @@ interface EditorStoreState {
     selectText: (id: number) => void;
     clearSelection: () => void;
     setItemLabel: (id: number, v: string) => void; // 아이템 라벨 편집
+    setStepLabel: (id: number, v: string) => void;
 
     setBackground: (cat: Category, stepsCount: 1 | 2 | 3 | 4) => void;
     setStepCount: (stepsCount: 1 | 2 | 3 | 4) => void;
@@ -94,7 +96,7 @@ function makeBg(cat: Category, steps: 1 | 2 | 3 | 4): BackgroundKey {
 
 export const useEditorStore = create<EditorStoreState>((set, get) => ({
     steps: [
-        { id: 1, name: "STEP1", itemIds: [], textIds: [], itemSlotById: {}, textSlotById: {} },
+        { id: 1, name: "STEP1", label: "", itemIds: [], textIds: [], itemSlotById: {}, textSlotById: {} },
     ],
     items: [],
     texts: [],
@@ -117,6 +119,10 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
     setItemLabel: (id, v) =>
         set((s) => ({
             items: s.items.map((it) => (it.id === id ? { ...it, label: v } : it)),
+        })),
+    setStepLabel: (id, v) =>
+        set((s) => ({
+            steps: s.steps.map((st) => (st.id === id ? { ...st, label: v } : st)),
         })),
 
     setBackground: (cat, stepsCount) => {
@@ -145,6 +151,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
                 steps.push({
                     id: newId,
                     name: `STEP${steps.length + 1}`,
+                    label: "",
                     itemIds: [],
                     textIds: [],
                     itemSlotById: {},

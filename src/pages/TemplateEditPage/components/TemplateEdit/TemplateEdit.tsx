@@ -11,6 +11,7 @@ import { useEditorStore } from "../../../../stores/editorStore";
 import { layoutRegistry, bgStepCount } from "./layoutRegistry";
 import type { BackgroundKey } from "./layoutRegistry";
 import StepText from "../../../TemplateViewPage/components/StepText";
+import StepNameBadge from "./StepNameBadge";
 
 type ActiveItem = {
     stepId: number;
@@ -29,6 +30,9 @@ export default function TemplateEdit() {
     const selectItem = useEditorStore((s) => s.selectItem);
     const setItemLabel = useEditorStore((s) => s.setItemLabel);
     const selectText = useEditorStore((s) => s.selectText);
+    const selectedStepId = useEditorStore((s) => s.selectedStepId);
+    const selectStep     = useEditorStore((s) => s.selectStep);
+    const setStepLabel   = useEditorStore((s) => s.setStepLabel);
     const placeItem = useEditorStore((s) => s.placeItem);
     const placeText = useEditorStore((s) => s.placeText);
     const moveItemAcrossSteps = useEditorStore((s) => s.moveItemAcrossSteps);
@@ -426,6 +430,40 @@ export default function TemplateEdit() {
                             );
                         });
                     })}
+
+                    {/* ✅ 스텝 이름 라벨 (아이템/텍스트 렌더 다음, DndContext 내부) */}
+                    {steps.map((st, sIdx) => {
+                        const grid = stepLayouts[sIdx];
+                        if (!grid) return null;
+
+                        const anchor = getStepAnchorPx(grid, CANVAS);
+
+                        return (
+                            <div
+                            key={`step-label-${st.id}`}
+                            style={{
+                                position: "absolute",
+                                left: anchor.x,
+                                top: anchor.y,
+                                transform: "translate(-50%, -50%)",
+                                transformOrigin: "50% 50%",
+                                overflow: "visible",                          // 잘림 방지
+                                zIndex: selectedStepId === st.id ? 900 : 5,   // 선택 시 항상 위로
+                                pointerEvents: "auto",
+                            }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => { e.stopPropagation(); selectStep(st.id); }}
+                            >
+                            <StepNameBadge
+                                value={st.label ?? ""}                // 비어있으면 컴포넌트가 숨김 처리
+                                selected={selectedStepId === st.id}   // 선택 시 편집 모드
+                                onChange={(v) => setStepLabel(st.id, v)}
+                                stepIndex={sIdx}
+                                totalSteps={steps.length}
+                            />
+                            </div>
+                        );
+                    })}
                 </DndContext>
             </div>
         </div>
@@ -587,6 +625,17 @@ function ItemNameBadge({
             </div>
         </div>
     );
+}
+
+// 스텝 라벨의 기준점(그리드 중심) 계산
+function getStepAnchorPx(grid: { itemSlots: {x:number;y:number}[]; textSlots: {x:number;y:number}[] }, CANVAS: number) {
+    const src = (grid.itemSlots?.length ? grid.itemSlots : grid.textSlots) ?? [];
+    if (!src.length) return { x: CANVAS/2, y: CANVAS/2 };
+    let sx = 0, sy = 0;
+    for (const s of src) { sx += s.x; sy += s.y; }
+    const cx = (sx / src.length) * CANVAS;
+    const cy = (sy / src.length) * CANVAS;
+    return { x: cx, y: cy };
 }
 
 // 캔버스 좌표(x,y)에 텍스트 박스를 절대배치해서 재사용

@@ -3,7 +3,7 @@ import { useEditorStore } from "../../../../stores/editorStore";
 export default function EditStepPanel() {
     const steps = useEditorStore((s) => s.steps);
     const selectedStepId = useEditorStore((s) => s.selectedStepId);
-    const renameStep = useEditorStore((s) => s.renameStep);
+    const setStepLabel = useEditorStore((s) => s.setStepLabel);
     const selectStep = useEditorStore((s) => s.selectStep);
 
     if (!steps || steps.length === 0) {
@@ -18,10 +18,10 @@ export default function EditStepPanel() {
                 <div key={st.id} className="flex flex-col items-start gap-2 self-stretch">
                     <span className="text-[#4D4D4D] font-pretendard text-base font-medium leading-normal">{`STEP${idx + 1}`}</span>
                     <input
-                        value={st.name}
+                        value={st.label ?? ""}
                         onFocus={() => selectStep(st.id)}
-                        onChange={(e) => renameStep(st.id, e.target.value)}
-                        placeholder={`STEP${idx + 1}`}
+                        onChange={(e) => setStepLabel(st.id, e.target.value)}
+                        placeholder={st.name}
                         className={`flex h-14 px-4 py-2 items-center gap-2 self-stretch rounded-lg border ${
                             selectedStepId === st.id ? "border-[#141414]" : "border-[#CCC]"
                         }`}
