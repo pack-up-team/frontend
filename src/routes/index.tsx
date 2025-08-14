@@ -4,6 +4,7 @@ import DashboardPage from '../pages/DashboardPage';
 import SnsCallback from '../pages/AuthPage/components/SnsCallback';
 import TemplateViewPage from '../pages/TemplateViewPage';
 import TemplateEditPage from '../pages/TemplateEditPage';
+import AgreementDetail from '../pages/Agreements';
 
 export const routes = [
     { path: '/', element: <LandingPage /> },
@@ -12,4 +13,5 @@ export const routes = [
     { path: 'dashboard', element: <DashboardPage /> },
     { path: 'template/:id', element: <TemplateViewPage /> },
     { path: 'template/:id/edit', element: <TemplateEditPage /> },
+    { path: 'agreements/:id', element: <AgreementDetail /> },
 ];
