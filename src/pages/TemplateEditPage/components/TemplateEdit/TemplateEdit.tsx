@@ -25,6 +25,9 @@ export default function TemplateEdit() {
     const background = useEditorStore((s) => s.background);
     const clearSelection = useEditorStore((s) => s.clearSelection);
     const selectedTextId = useEditorStore((s) => s.selectedTextId);
+    const selectedItemId = useEditorStore((s) => s.selectedItemId);
+    const selectItem = useEditorStore((s) => s.selectItem);
+    const setItemLabel = useEditorStore((s) => s.setItemLabel);
     const selectText = useEditorStore((s) => s.selectText);
     const placeItem = useEditorStore((s) => s.placeItem);
     const placeText = useEditorStore((s) => s.placeText);
@@ -391,6 +394,10 @@ export default function TemplateEdit() {
                                     x={base.x}
                                     y={base.y}
                                     imgUrl={`https://packupapi.xyz/images/object/${item.cate}/${item.name}.png`}
+                                    selected={selectedItemId === itemId}
+                                    label={item.label ?? ""}
+                                    onSelect={() => selectItem(itemId)}
+                                    onLabelChange={(v) => setItemLabel(itemId, v)}
                                 />
                             );
                         });
@@ -443,7 +450,16 @@ function BackgroundImage({ bg }: { bg: BackgroundKey }) {
     );
 }
 
-function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string }) {
+function DraggableItem(props: {
+    id: string;
+    x: number;
+    y: number;
+    imgUrl: string;
+    selected?: boolean;
+    label?: string;
+    onSelect?: () => void;
+    onLabelChange?: (v: string) => void;
+}) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: props.id });
 
     // dnd-kit에서 내려주는 이동량을 기존 중앙정렬 translate와 결합
@@ -452,10 +468,8 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
     return (
         <div
             ref={setNodeRef}
-            {...listeners}
-            {...attributes}
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); props.onSelect?.(); }}
             id={props.id}
             style={{
                 position: "absolute",
@@ -467,7 +481,7 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
                 pointerEvents: "auto",
                 touchAction: "none",
                 cursor: isDragging ? "grabbing" : "grab",
-                zIndex: isDragging ? 10 : 1, // 드래그 중 위로
+                zIndex: isDragging ? 10 : (props.selected ? 9 : 1),
                 willChange: "transform",
             }}
         >
@@ -476,7 +490,101 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
                 alt=""
                 className="w-full h-full object-contain select-none"
                 draggable={false}
+                {...listeners}
+                {...attributes}
+                style={{ position: "relative", zIndex: 1 }}
             />
+            <ItemNameBadge
+                value={props.label ?? ""}
+                selected={!!props.selected}
+                onChange={props.onLabelChange}
+            />
+        </div>
+    );
+}
+
+function ItemNameBadge({
+    value,
+    selected,
+    onChange,
+}: {
+    value: string;
+    selected: boolean;
+    onChange?: (v: string) => void;
+}) {
+    // 텍스트가 있을 때만 정적 박스(검은색) 렌더
+    const hasText = value.trim().length > 0;
+
+    // 아이템 하단 중앙 + -30/-30
+    const base: React.CSSProperties = {
+        position: "absolute",
+        left: "50%",
+        top: "100%",
+        transform: "translate(-15%, -30px) rotate(-30deg) skewX(-30deg)",
+        transformOrigin: "50% 50%",
+        pointerEvents: "auto",
+        zIndex: selected ? 200 : 20,
+    };
+
+    // 편집 중
+    if (selected) {
+        return (
+            <div style={base} onPointerDown={(e) => e.stopPropagation()}>
+                <input
+                    autoFocus
+                    value={value}
+                    onChange={(e) => onChange?.(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    // 글자수만큼 가변폭
+                    style={{
+                        width: `${Math.max(1, value.length)}ch`,
+                        minWidth: "2ch",
+                        display: "inline-block",
+                        boxSizing: "content-box",
+                        overflow: "visible",
+
+                        background: "#000000",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "4px 6px",
+                        margin: 0,
+                        fontWeight: 700,
+                        fontSize: 16,
+                        lineHeight: "20px",
+                        outline: "none",
+                        // 입력 caret 잘 보이도록
+                        textShadow: "0 0 0 #ffffff",
+                    }}
+                    placeholder=""
+                />
+            </div>
+        );
+    }
+
+    // 선택 해제 상태: 텍스트가 없으면 아무것도 렌더하지 않음
+    if (!hasText) return null;
+
+    // 정적 라벨(검은 박스, 라운드 없음)
+    return (
+        <div style={base} onPointerDown={(e) => e.stopPropagation()}>
+            <div
+                style={{
+                    display: "inline-block",
+                    background: "#000000",
+                    color: "#ffffff",
+                    // ✅ 라운드 제거
+                    borderRadius: 0,
+                    // 글자수 맞춰 가변폭 + 적당한 패딩
+                    padding: "4px 6px",
+                    fontWeight: 600,
+                    fontSize: 12,
+                    lineHeight: "14px",
+                    whiteSpace: "nowrap",
+                    userSelect: "none",
+                }}
+            >
+                {value}
+            </div>
         </div>
     );
 }
@@ -507,7 +615,7 @@ function PositionedStepText({
                 transformOrigin: "50% 50%",
                 zIndex: open ? 100 : (selected ? 12 : 2),
             }}
-            className={`pointer-events-auto ${selected ? "ring-2 ring-[#5736FF] rounded-xl" : ""}`}
+            className={`pointer-events-auto ${selected ? "ring-2 ring-[#5736FF]" : ""}`}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
             role="button"

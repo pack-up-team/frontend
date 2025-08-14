@@ -17,7 +17,13 @@ interface Step {
     itemSlotById?: Record<number, number | undefined>;
     textSlotById?: Record<number, number | undefined>;
 }
-interface Item { id: number; name: string; cate: Category; catalogId?: number; }
+interface Item {
+    id: number;
+    name: string;
+    cate: Category;
+    catalogId?: number;
+    label?: string; // 캔버스에 표시할 사용자 라벨(편집 대상)
+}
 interface TextBox { id: number; value: string; }
 
 interface EditorStoreState {
@@ -38,6 +44,7 @@ interface EditorStoreState {
     selectItem: (id: number) => void;
     selectText: (id: number) => void;
     clearSelection: () => void;
+    setItemLabel: (id: number, v: string) => void; // 아이템 라벨 편집
 
     setBackground: (cat: Category, stepsCount: 1 | 2 | 3 | 4) => void;
     setStepCount: (stepsCount: 1 | 2 | 3 | 4) => void;
@@ -107,6 +114,10 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
             selectedTextId: undefined,
             mode: "ADD_ITEM",
         }),
+    setItemLabel: (id, v) =>
+        set((s) => ({
+            items: s.items.map((it) => (it.id === id ? { ...it, label: v } : it)),
+        })),
 
     setBackground: (cat, stepsCount) => {
         // 배경키 갱신
@@ -205,7 +216,11 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
             const id = nextIdFromState(s);
             created = id;
             return {
-                items: [...s.items, { id, name: payload.name, cate: payload.cate, catalogId: payload.catalogId }],
+                // 새 아이템 기본 라벨은 빈 문자열
+                items: [
+                    ...s.items,
+                    { id, name: payload.name, cate: payload.cate, catalogId: payload.catalogId, label: "" },
+                ],
                 steps: s.steps.map((st) =>
                     st.id === stepId
                         ? {

@@ -5,7 +5,7 @@ import Button from "../../../../components/Button";
 export default function EditItemPanel() {
     const selectedItemId = useEditorStore((s) => s.selectedItemId);
     const item = useEditorStore((s) => s.items.find((it) => it.id === s.selectedItemId));
-    const renameItem = useEditorStore((s) => s.renameItem);
+    const setItemLabel = useEditorStore(s => s.setItemLabel);
 
     if (!selectedItemId || !item) {
         return (
@@ -16,20 +16,22 @@ export default function EditItemPanel() {
         );
     }
 
+    const labelValue = item.label ?? "";
+
     return (
         <div className="flex w-[400px] flex-col items-start gap-4">
             <div className="flex flex-col items-end gap-4 self-stretch">
                 <div className="flex flex-col items-start gap-2 self-stretch">
                     <span className="text-[#4D4D4D] font-pretendard text-base font-medium leading-normal">이름</span>
                     <input
-                        value={item.name}
-                        placeholder="이름을 입력하세요"
-                        onChange={(e) => renameItem(item.id, e.target.value)}
+                        value={labelValue}
+                        placeholder={item.name}
+                        onChange={(e) => setItemLabel(selectedItemId, e.target.value)}
                         className="flex h-14 px-4 py-2 items-center gap-2 self-stretch rounded-lg border border-[#CCC] focus:border-[#141414] outline-none"
                     />
                 </div>
                 <div className="flex justify-end">
-                    <Button disabled={!item.name} onClick={() => renameItem(item.id, "")} variant="line" className="w-[120px] h-[38px] !p-0 text-[#D90050]">삭제</Button>
+                    <Button disabled={!labelValue} onClick={() => setItemLabel(selectedItemId, "")} variant="line" className="w-[120px] h-[38px] !p-0 text-[#D90050]">삭제</Button>
                 </div>
             </div>
         </div>
