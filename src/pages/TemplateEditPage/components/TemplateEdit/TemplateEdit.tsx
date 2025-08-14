@@ -23,6 +23,9 @@ export default function TemplateEdit() {
     const items = useEditorStore((s) => s.items);
     const texts = useEditorStore((s) => s.texts);
     const background = useEditorStore((s) => s.background);
+    const clearSelection = useEditorStore((s) => s.clearSelection);
+    const selectedTextId = useEditorStore((s) => s.selectedTextId);
+    const selectText = useEditorStore((s) => s.selectText);
     const placeItem = useEditorStore((s) => s.placeItem);
     const placeText = useEditorStore((s) => s.placeText);
     const moveItemAcrossSteps = useEditorStore((s) => s.moveItemAcrossSteps);
@@ -314,10 +317,26 @@ export default function TemplateEdit() {
         setDeletePreview(false);
     };
 
+    // ESC로 선택 해제
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") clearSelection();
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [clearSelection]);
+
     return (
         <div className="relative w-full" style={{ height: "calc(100vh - 144px)" }}>
             {/* 캔버스 컨테이너 (배경+가이드+아이템이 같은 좌표계) */}
-            <div ref={containerRef} className="relative w-[800px] h-[800px] bg-white overflow-hidden shrink-0">
+            <div
+                ref={containerRef}
+                className="relative w-[800px] h-[800px] bg-white overflow-hidden shrink-0"
+                onPointerDown={(e) => {
+                    // 진짜 빈 캔버스를 눌렀을 때만 해제
+                    if (e.target === e.currentTarget) clearSelection();
+                }}
+            >
                 {/* 배경 이미지 */}
                 <div className="absolute inset-0 w-[800px] h-[800px] pointer-events-none select-none z-0">
                     <BackgroundImage bg={background} />
@@ -389,7 +408,14 @@ export default function TemplateEdit() {
                             if (typeof idx !== "number") return null;
                             const base = toPx(grid.textSlots[idx]);
                             return (
-                                <PositionedStepText key={`t-${st.id}-${textId}`} x={base.x} y={base.y} text={tx.value} />
+                                <PositionedStepText
+                                    key={`t-${st.id}-${textId}`}
+                                    x={base.x}
+                                    y={base.y}
+                                    text={tx.value}
+                                    selected={selectedTextId === textId}
+                                    onSelect={() => selectText(textId)}   // ← 클릭 시 패널을 텍스트 편집으로
+                                />
                             );
                         });
                     })}
@@ -428,6 +454,8 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
             ref={setNodeRef}
             {...listeners}
             {...attributes}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             id={props.id}
             style={{
                 position: "absolute",
@@ -453,8 +481,20 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
     );
 }
 
-// 캔버스 좌표(x,y)에 템플릿 보기용 StepText를 절대배치해서 재사용
-function PositionedStepText({ x, y, text }: { x: number; y: number; text: string }) {
+// 캔버스 좌표(x,y)에 텍스트 박스를 절대배치해서 재사용
+function PositionedStepText({
+    x,
+    y,
+    text,
+    selected = false,
+    onSelect,
+}: {
+    x: number;
+    y: number;
+    text: string;
+    selected?: boolean;
+    onSelect?: () => void;
+}) {
     const [open, setOpen] = useState(false);
     return (
         <div
@@ -465,11 +505,21 @@ function PositionedStepText({ x, y, text }: { x: number; y: number; text: string
                 // 기본 배치 + 회전 30도 + 스큐 30도
                 transform: `translate(-50%, -50%) rotate(-30deg) skewX(-30deg)`,
                 transformOrigin: "50% 50%",
-                zIndex: open ? 100 : 2,
+                zIndex: open ? 100 : (selected ? 12 : 2),
             }}
-            className="pointer-events-auto"
+            className={`pointer-events-auto ${selected ? "ring-2 ring-[#5736FF] rounded-xl" : ""}`}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect?.();
+                }
+            }}
         >
-            <StepText text={text || "텍스트"} open={open} onOpenChange={setOpen} />
+            <StepText text={text || "내용을 입력하세요."} open={open} onOpenChange={setOpen} />
         </div>
     );
 }

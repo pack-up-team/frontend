@@ -37,6 +37,7 @@ interface EditorStoreState {
     selectStep: (id: number) => void;
     selectItem: (id: number) => void;
     selectText: (id: number) => void;
+    clearSelection: () => void;
 
     setBackground: (cat: Category, stepsCount: 1 | 2 | 3 | 4) => void;
     setStepCount: (stepsCount: 1 | 2 | 3 | 4) => void;
@@ -99,6 +100,13 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
     selectStep: (id) => set({ selectedStepId: id, mode: "EDIT_STEP" }),
     selectItem: (id) => set({ selectedItemId: id, mode: "EDIT_ITEM" }),
     selectText: (id) => set({ selectedTextId: id, mode: "EDIT_TEXT" }),
+    clearSelection: () =>
+        set({
+            selectedStepId: undefined,
+            selectedItemId: undefined,
+            selectedTextId: undefined,
+            mode: "ADD_ITEM",
+        }),
 
     setBackground: (cat, stepsCount) => {
         // 배경키 갱신
