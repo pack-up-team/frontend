@@ -91,7 +91,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     items: [],
     texts: [],
 
-    background: makeBg("office", 4),
+    background: makeBg("office", 3),
 
     mode: "ADD_ITEM",
 

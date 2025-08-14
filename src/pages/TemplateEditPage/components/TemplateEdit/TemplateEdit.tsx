@@ -6,7 +6,7 @@ import {
     useSensors,
     useDraggable
 } from "@dnd-kit/core";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent, DragMoveEvent } from "@dnd-kit/core";
 import { useEditorStore } from "../../../../stores/editorStore";
 import { layoutRegistry, bgStepCount } from "./layoutRegistry";
 import type { BackgroundKey } from "./layoutRegistry";
@@ -28,7 +28,7 @@ export default function TemplateEdit() {
     const setStepCount = useEditorStore((s) => s.setStepCount);
 
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const [size, setSize] = useState({ w: 0, h: 0 });
+    const CANVAS = 800;
 
     // 드래그 중 상태(가이드 표시용)
     const [active, setActive] = useState<ActiveItem | null>(null);
@@ -36,16 +36,9 @@ export default function TemplateEdit() {
     // dnd 센서
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
-    // 컨테이너 리사이즈 추적
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const ro = new ResizeObserver(([entry]) => {
-            const cr = entry.contentRect;
-            setSize({ w: cr.width, h: cr.height });
-        });
-        ro.observe(containerRef.current);
-        return () => ro.disconnect();
-    }, []);
+    // 포인터 좌표 안정화 & 드롭 미리보기(예상 착지)
+    const [lastPointer, setLastPointer] = useState<{ x: number; y: number } | null>(null);
+    const [hover, setHover] = useState<{ sIdx: number; slot: number } | null>(null);
 
     // 현재 배경의 레이아웃(스텝별 슬롯들)
     const stepLayouts = useMemo(() => layoutRegistry[background] ?? [], [background]);
@@ -126,7 +119,7 @@ export default function TemplateEdit() {
             });
         });
 
-        // 텍스트(옵션)는 기존 그대로
+        // 텍스트
         steps.forEach((st, sIdx) => {
             const grid = stepLayouts[sIdx];
             if (!grid) return;
@@ -155,8 +148,8 @@ export default function TemplateEdit() {
 
     // 픽셀 좌표로 변환
     const toPx = (slot: { x: number; y: number }) => ({
-        x: slot.x * size.w,
-        y: slot.y * size.h,
+        x: slot.x * CANVAS,
+        y: slot.y * CANVAS,
     });
 
     // 특정 스텝에서 "해당 슬롯이 점유되었는지" 빠르게 판단
@@ -172,6 +165,53 @@ export default function TemplateEdit() {
         });
     }, [steps]);
 
+    // 공통: 이벤트에서 컨테이너 기준 포인터(=드래그 아이템 중심) 추출
+    const getPointerInCanvas = (e: DragMoveEvent | DragEndEvent): { x: number; y: number } | null => {
+        if (!containerRef.current) return null;
+        const rect =
+            e.active.rect.current?.translated ??
+            e.active.rect.current?.initial ??
+            null;
+        if (!rect) return null;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const box = containerRef.current.getBoundingClientRect();
+        return { x: centerX - box.left, y: centerY - box.top };
+    };
+
+    // 공통: 최근접 빈 슬롯 찾기 (거리 계산 정리)
+    const findNearestVacant = (
+        px: number,
+        py: number,
+        fromStepId: number,
+        itemId: number,
+        originSlot: number | undefined
+    ): { sIdx: number; slot: number } | null => {
+        let best = { sIdx: -1, slot: -1, d2: Number.POSITIVE_INFINITY };
+
+        for (let sIdx = 0; sIdx < steps.length; sIdx++) {
+            const grid = stepLayouts[sIdx];
+            if (!grid) continue;
+
+            // 점유 슬롯(본인 원래 칸은 비워둔 것으로 간주)
+            const occ = new Map<number, number>(occupiedByStep[sIdx] ?? new Map());
+            if (typeof originSlot === "number" && steps[sIdx].id === fromStepId) {
+                if (occ.get(originSlot) === itemId) occ.delete(originSlot);
+            }
+
+            grid.itemSlots.forEach((slot, i) => {
+                if (occ.has(i)) return;
+                const p = toPx(slot);
+                const dx = p.x - px;
+                const dy = p.y - py;
+                const d2 = dx * dx + dy * dy;
+                if (d2 < best.d2) best = { sIdx, slot: i, d2 };
+            });
+        }
+
+        return best.sIdx >= 0 ? { sIdx: best.sIdx, slot: best.slot } : null;
+    };
+
     // 드래그 시작
     const onDragStart = (e: DragStartEvent) => {
         const id = String(e.active.id); // "item-<stepId>-<itemId>"
@@ -184,88 +224,92 @@ export default function TemplateEdit() {
         setActive({ stepId, itemId, originSlot });
     };
 
+    // 드래그 이동(미리보기 하이라이트)
+    const onDragMove = (e: DragMoveEvent) => {
+        const id = String(e.active.id);
+        if (!id.startsWith("item-") || !active) return;
+        const [, stepStr, itemStr] = id.split("-");
+        const fromStepId = Number(stepStr);
+        const itemId = Number(itemStr);
+
+        const p = getPointerInCanvas(e);
+        if (!p) return;
+        setLastPointer(p);
+
+        const best = findNearestVacant(p.x, p.y, fromStepId, itemId, active.originSlot);
+        setHover(best);
+    };
+
+    // 드래그 종료(스냅 배치)
     const onDragEnd = (e: DragEndEvent) => {
         const id = String(e.active.id);
         if (!id.startsWith("item-")) {
             setActive(null);
+            setHover(null);
+            setLastPointer(null);
             return;
         }
         const [, stepStr, itemStr] = id.split("-");
         const fromStepId = Number(stepStr);
         const itemId = Number(itemStr);
-    
-        if (!containerRef.current) {
+
+        // 1) 좌표 안정화: 이동 중 저장된 좌표 우선, 없으면 이벤트로 계산
+        const p = lastPointer ?? getPointerInCanvas(e);
+        if (!p) {
             setActive(null);
+            setHover(null);
+            setLastPointer(null);
             return;
         }
-    
-        // 요소 중심 좌표 (널 가드)
-        const rect =
-            e.active.rect.current?.translated ??
-            e.active.rect.current?.initial ??
-            null;
-        if (!rect) {
+
+        // 2) 최근접 빈 슬롯 찾기
+        const best = findNearestVacant(p.x, p.y, fromStepId, itemId, active?.originSlot);
+        if (!best) {
             setActive(null);
-            return;
-        }
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const box = containerRef.current.getBoundingClientRect();
-        const px = centerX - box.left;
-        const py = centerY - box.top;
-    
-        // 모든 스텝의 모든 슬롯 중, 비어있는 최근접 후보 탐색
-        const stepLayouts = layoutRegistry[background] ?? [];
-        let best = { sIdx: -1, slot: -1, d2: Number.POSITIVE_INFINITY };
-    
-        for (let sIdx = 0; sIdx < steps.length; sIdx++) {
-            const grid = stepLayouts[sIdx];
-            if (!grid) continue;
-    
-            // 점유 슬롯(본인 슬롯은 비워둔 것으로 간주)
-            const occ = new Map<number, number>();
-            const st = steps[sIdx];
-            const byId = st.itemSlotById ?? {};
-            st.itemIds.forEach((iid) => {
-                const ii = byId[iid];
-                if (typeof ii === "number") occ.set(ii, iid);
-            });
-            if (typeof active?.originSlot === "number" && fromStepId === st.id) {
-                if (occ.get(active.originSlot) === itemId) occ.delete(active.originSlot);
-            }
-    
-            grid.itemSlots.forEach((slot, i) => {
-                if (occ.has(i)) return;
-                const p = toPx(slot);
-                const dx = p.x - px;
-                const dy = p.y - py;
-                const d2 = dx * dx + dy * dy;
-                if (d2 < best.d2) best = { sIdx, slot: i, d2 };
-            });
-        }
-    
-        if (best.sIdx < 0 || best.slot < 0) {
-            setActive(null);
+            setHover(null);
+            setLastPointer(null);
             return; // 드롭 불가 → 원위치
         }
-    
+
+        // 3) 배치
         const toStepId = steps[best.sIdx].id;
-    
         if (toStepId !== fromStepId) {
             moveItemAcrossSteps(itemId, fromStepId, toStepId);
         }
         placeItem(toStepId, itemId, best.slot);
+
+        // 4) 정리
         setActive(null);
+        setHover(null);
+        setLastPointer(null);
     };
 
     return (
         <div className="relative w-full" style={{ height: "calc(100vh - 144px)" }}>
-            {/* 배경 이미지: 자산 경로 규칙에 맞춰 교체 */}
-            <BackgroundImage bg={background} />
+            {/* 캔버스 컨테이너 (배경+가이드+아이템이 같은 좌표계) */}
+            <div ref={containerRef} className="relative w-[800px] h-[800px] bg-white overflow-hidden shrink-0">
+                {/* 배경 이미지 */}
+                <div className="absolute inset-0 w-[800px] h-[800px] pointer-events-none select-none z-0">
+                    <BackgroundImage bg={background} />
+                </div>
 
-            {/* 캔버스 컨테이너 (격자/아이템/텍스트 모두 이 안에 절대배치) */}
-            <div ref={containerRef} className="absolute inset-0 overflow-hidden">
-                <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+                <DndContext sensors={sensors} onDragStart={onDragStart} onDragMove={onDragMove} onDragEnd={onDragEnd}>
+                    {/* 가이드: 모든 스텝에 대해, 부모가 계산한 grid를 직접 전달 */}
+                    {active && steps.map((st, sIdx) => {
+                        const grid = stepLayouts[sIdx];
+                        if (!grid) return null;
+                        return (
+                            <GridGuide
+                                key={st.id}
+                                stepIndex={sIdx}
+                                occupied={occupiedByStep}
+                                size={{ w: CANVAS, h: CANVAS }}
+                                active={active}
+                                highlightSlot={hover && hover.sIdx === sIdx ? hover.slot : -1}
+                                grid={grid}
+                            />
+                        );
+                    })}
                     {/* 아이템들 */}
                     {steps.map((st, sIdx) => {
                         const grid = stepLayouts[sIdx];
@@ -305,17 +349,6 @@ export default function TemplateEdit() {
                             );
                         });
                     })}
-
-                    {/* 드래그 가이드(가능/불가 슬롯 시각화) */}
-                    {active && (
-                        <GridGuide
-                            stepIndex={steps.findIndex((s) => s.id === active.stepId)}
-                            background={background}
-                            occupied={occupiedByStep}
-                            size={size}
-                            active={active}
-                        />
-                    )}
                 </DndContext>
             </div>
         </div>
@@ -397,14 +430,19 @@ function TextBubble({ x, y, value }: { x: number; y: number; value: string }) {
 /** 드래그 중에만 등장하는 그리드 가이드(초록=가능, 빨강=점유중) */
 function GridGuide(props: {
     stepIndex: number;
-    background: BackgroundKey;
     occupied: Map<number, number>[];
     size: { w: number; h: number };
     active: ActiveItem;
+    highlightSlot?: number; // 예상 착지 슬롯 인덱스 (해당 스텝일 때만 유효)
+    grid: {
+        itemSlots: { x: number; y: number }[];
+        textSlots: { x: number; y: number }[];
+    };
 }) {
-    const { stepIndex, background, occupied, size, active } = props;
-    const grid = layoutRegistry[background]?.[stepIndex];
-    if (!grid) return null;
+    const { stepIndex, occupied, size, active, highlightSlot = -1, grid } = props;
+    if (!grid) {
+        return null;
+    }
 
     // 점유 슬롯 집합
     const occMap = occupied[stepIndex] ?? new Map<number, number>();
@@ -415,6 +453,13 @@ function GridGuide(props: {
             {grid.itemSlots.map((slot, i) => {
                 const p = { x: slot.x * size.w, y: slot.y * size.h };
                 const isBlocked = occ.has(i) && active.originSlot !== i; // 내가 점유하던 칸은 허용
+                const isHL = i === highlightSlot;
+
+                // 기본 색: 가능=초록, 점유=빨강. 하이라이트면 밝게 + 윤곽선
+                const baseBg = isBlocked ? "#B54F2C" : "#78C170";
+                const bg = isHL ? (isBlocked ? "#E08D7B" : "#9BE28A") : baseBg;
+                const boxShadow = isHL ? "0 0 0 2px #FFF, 0 0 0 5px #5736FF" : undefined;
+
                 return (
                     <div
                         key={i}
@@ -424,9 +469,10 @@ function GridGuide(props: {
                             top: p.y,
                             transform: "translate(-50%, -50%)",
                             width: 43,
-                            height: 74,
-                            clipPath: "polygon(0% 33.8%, 100% 0%, 100% 66.2%, 0% 100%)",
-                            background: isBlocked ? "#B54F2C" : "#78C170",
+                            height: 78,
+                            clipPath: "polygon(0% 32%, 100% 0%, 100% 68%, 0% 100%)",
+                            background: bg,
+                            boxShadow,
                         }}
                     />
                 );
