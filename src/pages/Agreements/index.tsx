@@ -70,17 +70,17 @@ const AgreementsPage = () => {
                            text-[14px] leading-7 text-[#4D4D4D]"
               >
                 {loading ? (
-                  <p>불러오는 중…</p>
+                  <p className="font-pretendard">불러오는 중…</p>
                 ) : error ? (
-                  <p>{error}</p>
+                  <p className="font-pretendard">{error}</p>
                 ) : sections.length === 0 ? (
-                  <p>콘텐츠가 없습니다.</p>
+                  <p className="font-pretendard">콘텐츠가 없습니다.</p>
                 ) : (
                   <div className="space-y-4">
                     {sections.map((sec, i) => (
                       <section
                         key={i}
-                        className="rounded-md border border-[#E3E3E3] bg-white"
+                        className="rounded-md border border-[#E3E3E3] bg-white font-pretendard"
                       >
                         <header className="px-4 py-3 border-b text-[15px] font-pretendard text-[#141414]">
                           {i + 1}. {sec.title}
