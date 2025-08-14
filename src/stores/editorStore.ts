@@ -20,7 +20,7 @@ interface Step {
 interface Item { id: number; name: string; cate: Category; catalogId?: number; }
 interface TextBox { id: number; value: string; }
 
-interface EditorState {
+interface EditorStoreState {
     steps: Step[];
     items: Item[];
     texts: TextBox[];
@@ -58,7 +58,7 @@ interface EditorState {
     moveItemAcrossSteps: (itemId: number, fromStepId: number, toStepId: number) => void;
 }
 
-function nextIdFromState(s: EditorState): number {
+function nextIdFromState(s: EditorStoreState): number {
     let maxId = 0;
 
     for (const st of s.steps) {
@@ -84,7 +84,7 @@ function makeBg(cat: Category, steps: 1 | 2 | 3 | 4): BackgroundKey {
     return `${cat}-${steps}` as BackgroundKey;
 }
 
-export const useEditorStore = create<EditorState>((set, get) => ({
+export const useEditorStore = create<EditorStoreState>((set, get) => ({
     steps: [
         { id: 1, name: "STEP1", itemIds: [], textIds: [], itemSlotById: {}, textSlotById: {} },
     ],
@@ -252,3 +252,5 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             return { steps };
         }),
 }));
+
+export type EditorState = ReturnType<typeof useEditorStore.getState>;
