@@ -6,7 +6,7 @@ type StepTextProps = {
 };
 
 const boxBaseStyle = "flex flex-col justify-center items-center gap-[2px] flex-shrink-0 rounded-lg px-4 py-3 w-[110px]";
-const boxCloseStyle = `${boxBaseStyle} h-[80px] bg-[#141414]`;
+const boxCloseStyle = `${boxBaseStyle} h-[75px] bg-[#141414]`;
 const boxOpenStyle = `${boxBaseStyle} h-[160px] bg-[#5736FF]`;
 const textStyle = "w-[71px] flex-[1_0_0] text-white font-inter text-sm font-semibold leading-normal";
 

@@ -10,6 +10,7 @@ import type { DragEndEvent, DragStartEvent, DragMoveEvent } from "@dnd-kit/core"
 import { useEditorStore } from "../../../../stores/editorStore";
 import { layoutRegistry, bgStepCount } from "./layoutRegistry";
 import type { BackgroundKey } from "./layoutRegistry";
+import StepText from "../../../TemplateViewPage/components/StepText";
 
 type ActiveItem = {
     stepId: number;
@@ -388,7 +389,7 @@ export default function TemplateEdit() {
                             if (typeof idx !== "number") return null;
                             const base = toPx(grid.textSlots[idx]);
                             return (
-                                <TextBubble key={`t-${st.id}-${textId}`} x={base.x} y={base.y} value={tx.value} />
+                                <PositionedStepText key={`t-${st.id}-${textId}`} x={base.x} y={base.y} text={tx.value} />
                             );
                         });
                     })}
@@ -452,20 +453,22 @@ function DraggableItem(props: { id: string; x: number; y: number; imgUrl: string
     );
 }
 
-function TextBubble({ x, y, value }: { x: number; y: number; value: string }) {
+// 캔버스 좌표(x,y)에 템플릿 보기용 StepText를 절대배치해서 재사용
+function PositionedStepText({ x, y, text }: { x: number; y: number; text: string }) {
     return (
         <div
             style={{
                 position: "absolute",
                 left: x,
                 top: y,
-                transform: "translate(-50%, -50%)",
-                minWidth: 140,
-                maxWidth: 220,
+                // 기본 배치 + 회전 30도 + 스큐 30도
+                transform: `translate(-50%, -50%) rotate(-30deg) skewX(-30deg)`,
+                transformOrigin: "50% 50%",
+                zIndex: 2, // 평상시 아이템(zIndex:1) 위, 드래그 중 아이템(zIndex:10) 아래
             }}
-            className="px-3 py-2 rounded-lg bg-white/90 border border-[#CCC] text-[#141414] text-sm leading-snug pointer-events-none"
+            className="pointer-events-auto"
         >
-            {value || "텍스트"}
+            <StepText text={text || "텍스트"} />
         </div>
     );
 }
