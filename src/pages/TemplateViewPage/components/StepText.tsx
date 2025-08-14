@@ -38,7 +38,7 @@ const StepText = ({ text, open, defaultOpen = false, onOpenChange }: StepTextPro
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [isControlled, onOpenChange]);
 
     const toggle = () => {
         const next = !currOpen;
