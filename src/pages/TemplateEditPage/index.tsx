@@ -1,13 +1,24 @@
 import { useLayoutEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import TemplateEdit from "./components/TemplateEdit/TemplateEdit";
 import RightPanel from "./components/RightPanel/RightPanel";
 import { useEditorStore } from "../../stores/editorStore";
 import type { EditorState } from "../../stores/editorStore";
+import HeaderBar from "./components/TemplateEdit/HeaderBar";
+import StepSelectModal from "./components/TemplateEdit/StepSelectModal";
+import BackgroundSelectModal from "./components/TemplateEdit/BackgroundSelectModal";
+import PreviewModal from "./components/TemplateEdit/PreviewModal";
+import SavedModal from "./components/TemplateEdit/SavedModal";
 
 export default function TemplateEditPage() {
-    const { id } = useParams();
     const [ready, setReady] = useState(false);
+    // 헤더/모달 제어
+    const [openStep, setOpenStep] = useState(false);
+    const [openBg, setOpenBg] = useState(false);
+    const [openPreview, setOpenPreview] = useState(false);
+    const [openSaved, setOpenSaved] = useState(false);
+    // 템플릿 제목(스토어가 없으면 로컬 관리)
+    const [templateTitle, setTemplateTitle] = useState("");
+
     // 최초 진입 시 더미 데이터 주입
     // TODO: 서버에서 데이터 불러오기
     useLayoutEffect(() => {
@@ -79,9 +90,16 @@ export default function TemplateEditPage() {
 
     return (
         <div className="flex flex-col h-screen">
-            {/* 상단 헤더 자리(144px 고정) */}
+            {/* 상단 헤더 (144px 컨테이너 유지: 하단 캔버스 높이 계산과 일치) */}
             <div className="flex items-center px-4" style={{ height: 144 }}>
-                <div className="text-sm text-[#707070]">템플릿 ID: {id}</div>
+                <HeaderBar
+                    title={templateTitle}
+                    onChangeTitle={setTemplateTitle}
+                    onOpenBackgroundModal={() => setOpenBg(true)}
+                    onOpenStepModal={() => setOpenStep(true)}
+                    onOpenPreview={() => setOpenPreview(true)}
+                    onSave={() => setOpenSaved(true)}
+                />
             </div>
 
             {/* 본문: 좌측 캔버스 + 우측 패널 */}
@@ -103,6 +121,24 @@ export default function TemplateEditPage() {
                     </aside>
                 )}
             </div>
+
+            <StepSelectModal open={openStep} onClose={() => setOpenStep(false)} />
+            <BackgroundSelectModal open={openBg} onClose={() => setOpenBg(false)} />
+
+            <PreviewModal open={openPreview} onClose={() => setOpenPreview(false)}>
+                {ready && (
+                    // 모달 안에서 800×800으로 고정 프레임
+                    <div className="relative w-[800px] h-[800px] overflow-hidden">
+                        {/* 편집용 캔버스를 그대로 재사용하되 상호작용만 차단 */}
+                        <div className="pointer-events-none">
+                            <TemplateEdit />
+                        </div>
+                    </div>
+                )}
+            </PreviewModal>
+
+            <SavedModal open={openSaved} onClose={() => setOpenSaved(false)} />
+
         </div>
     );
 }
